@@ -2,108 +2,192 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Search Manager by Mobile</title>
+  <title>Manager Registration & Passbook</title>
   <style>
     body {
       font-family: Arial;
-      background: #f1f8e9;
+      background: #e0f7fa;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
+      padding: 20px;
     }
 
-    .box {
+    form, .search-section {
       background: #fff;
-      padding: 30px;
-      border-radius: 12px;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       width: 400px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.1);
-      animation: fadeIn 0.4s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
+      margin-bottom: 20px;
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 20px;
-      color: #33691e;
     }
 
-    input {
+    input, button {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
+      padding: 10px;
+      margin: 8px 0;
       border-radius: 6px;
       border: 1px solid #ccc;
     }
 
     button {
-      width: 100%;
-      padding: 12px;
-      background: #689f38;
+      background: #00796b;
       color: white;
       border: none;
-      border-radius: 6px;
       cursor: pointer;
     }
 
-    .result {
-      margin-top: 20px;
-      background: #f9fbe7;
-      padding: 15px;
-      border-radius: 6px;
-      border: 1px solid #cddc39;
-      font-size: 15px;
+    .success {
+      color: green;
+      text-align: center;
+      margin-top: 10px;
     }
 
-    .error {
+    .info-box {
+      background: #f1f8e9;
+      padding: 15px;
+      border-left: 5px solid #00796b;
+      margin-top: 15px;
+      animation: fadeIn 1s ease;
+    }
+
+    .signature {
+      text-align: right;
+      font-style: italic;
+      font-size: 18px;
+      color: #00796b;
+      animation: slideIn 1s ease-out;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
       margin-top: 10px;
-      color: red;
-      text-align: center;
+    }
+
+    .actions button {
+      flex: 1;
+      background: #004d40;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
   </style>
 </head>
 <body>
+<!-- Search Section -->
+<div class="search-section">
+  <h2>🔍 Passbook Search</h2>
+  <input type="tel" id="searchMobile" placeholder="Enter Mobile Number" pattern="[0-9]{10}">
+  <button onclick="searchPassbook()">Search</button>
 
-<div class="box">
-  <h2>Search Manager by Mobile</h2>
-  <input type="text" id="mobileInput" placeholder="Enter Mobile Number">
-  <button onclick="searchManager()">Search</button>
-  <div id="resultBox" class="result" style="display: none;"></div>
-  <div id="errorBox" class="error"></div>
+  <div id="passbookInfo" class="info-box" style="display: none;">
+    <p><strong>Full Name:</strong> <span id="pName"></span></p>
+    <p><strong>Account Number:</strong> <span id="pAcc"></span></p>
+    <p><strong>Customer ID:</strong> <span id="pCust"></span></p>
+    <div class="signature">— S.K SUSHANTA</div>
+    <div class="actions">
+      <button onclick="viewPassbook()">View Passbook</button>
+      <button onclick="downloadPDF()">Download PDF</button>
+    </div>
+    <pre id="passbookData" style="display:none; background:#fffbe6; padding:10px; margin-top:10px;"></pre>
+  </div>
 </div>
 
 <script>
-  function searchManager() {
-    const mobile = document.getElementById("mobileInput").value.trim();
-    const resultBox = document.getElementById("resultBox");
-    const errorBox = document.getElementById("errorBox");
-
-    resultBox.style.display = "none";
-    errorBox.textContent = "";
-
-    if (!mobile.match(/^\d{10}$/)) {
-      errorBox.textContent = "Enter a valid 10-digit mobile number.";
-      return;
+  // Generate IDs and Account Numbers
+  function generate(prefix, length) {
+    let result = prefix;
+    while (result.length < length) {
+      result += Math.floor(Math.random() * 10);
     }
+    return result;
+  }
 
-    const manager = JSON.parse(localStorage.getItem("managerAccount"));
+  // Save Manager on Register
+  document.getElementById("registerForm").addEventListener("submit", function(e) {
+    e.preventDefault();
 
-    if (manager && manager.mobile === mobile) {
-      resultBox.innerHTML = `
-        <strong>Holder Name:</strong> ${manager.fullName}<br>
-        <strong>Account Number:</strong> ${manager.accountNo}<br>
-        <strong>Customer ID:</strong> ${manager.customerId}<br>
-        <strong>IFSC Code:</strong> ${manager.ifsc}
-      `;
-      resultBox.style.display = "block";
+    const manager = {
+      fullName: document.getElementById("fullName").value,
+      dob: document.getElementById("dob").value,
+      mobile: document.getElementById("mobile").value,
+      email: document.getElementById("email").value,
+      accountNo: generate("30", 14),
+      ifsc: "BANKM000001",
+      customerId: generate("MGR", 10),
+      balance: 0.0,
+      transactions: [
+        { type: "Account Created", amount: 0, date: new Date().toLocaleString() }
+      ]
+    };
+
+    localStorage.setItem("managerAccount", JSON.stringify(manager));
+    document.getElementById("successMsg").textContent = "Registration Successful!";
+    setTimeout(() => {
+      window.location.href = "manager-login.html";
+    }, 2000);
+  });
+
+  // Search by mobile number
+  function searchPassbook() {
+    const input = document.getElementById("searchMobile").value.trim();
+    const data = JSON.parse(localStorage.getItem("managerAccount"));
+
+    if (data && data.mobile === input) {
+      document.getElementById("pName").textContent = data.fullName;
+      document.getElementById("pAcc").textContent = data.accountNo;
+      document.getElementById("pCust").textContent = data.customerId;
+      document.getElementById("passbookInfo").style.display = "block";
     } else {
-      errorBox.textContent = "Manager not found for this mobile number.";
+      alert("No matching record found.");
+      document.getElementById("passbookInfo").style.display = "none";
     }
+  }
+
+  // View Passbook in <pre>
+  function viewPassbook() {
+    const data = JSON.parse(localStorage.getItem("managerAccount"));
+    const box = document.getElementById("passbookData");
+
+    if (data) {
+      let text = `Passbook - ${data.fullName}\n\nAccount No: ${data.accountNo}\nCustomer ID: ${data.customerId}\nIFSC: ${data.ifsc}\n\nTransactions:\n`;
+      data.transactions.forEach(tx => {
+        text += `• ${tx.type} | ₹${tx.amount} | ${tx.date}\n`;
+      });
+
+      box.style.display = "block";
+      box.textContent = text;
+    }
+  }
+
+  // Download as PDF
+  function downloadPDF() {
+    const data = JSON.parse(localStorage.getItem("managerAccount"));
+
+    if (!data) return alert("No data to download!");
+
+    let content = `Bank Passbook\n\nFull Name: ${data.fullName}\nAccount No: ${data.accountNo}\nCustomer ID: ${data.customerId}\nIFSC: ${data.ifsc}\n\nTransactions:\n`;
+    data.transactions.forEach(tx => {
+      content += `• ${tx.type} - ₹${tx.amount} on ${tx.date}\n`;
+    });
+
+    const blob = new Blob([content], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "ManagerPassbook.pdf";
+    link.click();
   }
 </script>
 
