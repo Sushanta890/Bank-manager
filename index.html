@@ -1,22 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>Home - SK Bank Manager</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #1b1b1b;
+      color: white;
+      overflow: hidden;
+    }
 
-  <title>HTML</title>
-  
-  <!-- HTML -->
-  
+    /* Animated sliding button */
+    .side-button {
+      position: absolute;
+      top: 40%;
+      left: -200px; /* initially hidden */
+      width: 200px;
+      height: 60px;
+      background: linear-gradient(45deg, #00feca, #0077ff);
+      color: black;
+      font-weight: bold;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-top-right-radius: 30px;
+      border-bottom-right-radius: 30px;
+      animation: slideIn 2s forwards;
+      box-shadow: 0 0 20px rgba(0, 255, 200, 0.5);
+      transition: transform 0.3s ease;
+    }
 
-  <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css">
+    .side-button:hover {
+      transform: scale(1.05);
+    }
+
+    @keyframes slideIn {
+      0% {
+        left: -200px;
+      }
+      100% {
+        left: 0px;
+      }
+    }
+  </style>
 </head>
-
 <body>
-  <p>Nothing to see here...</p>
-  <!-- Project -->
-  <script src="main.js"></script>
+
+  <!-- Left Side Animated Button -->
+  <div class="side-button" onclick="openPage()">🏦 Open Bank Manager</div>
+
+  <script>
+    function openPage() {
+      // Animation effect before redirect
+      document.querySelector('.side-button').style.background = "#00ff88";
+      setTimeout(() => {
+        window.location.href = "/Bank manager/home.html";
+      }, 500); // wait 500ms before redirect
+    }
+  </script>
+
 </body>
 </html>
