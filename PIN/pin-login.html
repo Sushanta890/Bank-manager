@@ -4,37 +4,90 @@
   <meta charset="UTF-8">
   <title>Manager PIN Login</title>
   <style>
+    /* Smooth animated background */
     body {
-      font-family: Arial;
-      background: #fff3e0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      margin: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      background: linear-gradient(-45deg, #ffe0b2, #ffccbc, #ffe082, #ffcc80);
+      background-size: 400% 400%;
+      animation: bgChange 30s ease infinite;
     }
+
+    @keyframes bgChange {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     form {
       background: #fff;
       padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      width: 300px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      width: 320px;
+      animation: fadeIn 1.5s ease;
     }
-    input, button {
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h3 {
+      text-align: center;
+      color: #ff6f00;
+      margin-bottom: 20px;
+    }
+
+    input, button, a {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
       border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    input {
       border: 1px solid #ccc;
     }
+
     button {
       background: #ff6f00;
       color: white;
       border: none;
       cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(255, 111, 0, 0.4);
     }
+
+    button:hover {
+      background: #e65100;
+      transform: scale(1.03);
+      box-shadow: 0 6px 15px rgba(255, 111, 0, 0.6);
+    }
+
+    a {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      color: #ff6f00;
+      border: 1px solid transparent;
+      transition: color 0.3s;
+    }
+
+    a:hover {
+      color: #d84315;
+    }
+
     .error {
       color: red;
       text-align: center;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -45,6 +98,7 @@
   <input type="text" id="accountInput" placeholder="Account Number" required>
   <input type="password" id="pinInput" placeholder="4-digit PIN" maxlength="4" required>
   <button type="submit">Login</button>
+  <a href="forgot-pin.html">Forget 4 Digit PIN</a>
   <div class="error" id="errorMsg"></div>
 </form>
 
@@ -62,7 +116,7 @@
       return;
     }
 
-    window.location.href = "https://sushanta890.github.io/Bank/"; // your home/dashboard page
+    window.location.href = "https://sushanta890.github.io/Bank/"; // redirect after login
   });
 </script>
 

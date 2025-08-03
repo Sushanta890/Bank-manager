@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Forgot PIN</title>
+  <style>
+    /* Animated Background */
+    body {
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(-45deg, #fff8e1, #ffe0b2, #ffccbc, #ffe082);
+      background-size: 400% 400%;
+      animation: backgroundShift 30s ease infinite;
+    }
+
+    @keyframes backgroundShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    form {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      width: 320px;
+      animation: fadeIn 1.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h3 {
+      text-align: center;
+      color: #f57c00;
+      margin-bottom: 20px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    input {
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #f57c00;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(245, 124, 0, 0.3);
+    }
+
+    button:hover {
+      background: #e64a19;
+      transform: scale(1.03);
+      box-shadow: 0 6px 16px rgba(245, 124, 0, 0.5);
+    }
+
+    .pin-box {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: bold;
+      color: green;
+      font-size: 18px;
+      animation: fadeIn 1s ease;
+    }
+  </style>
+</head>
+<body>
+
+<form id="forgotForm">
+  <h3>Forgot 4-Digit PIN</h3>
+  <input type="text" id="accountInput" placeholder="Enter Account Number" required>
+  <button type="submit">Show PIN</button>
+  <div class="pin-box" id="pinDisplay"></div>
+</form>
+
+<script>
+  document.getElementById("forgotForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const acc = document.getElementById("accountInput").value;
+    const manager = JSON.parse(localStorage.getItem("managerAccount"));
+
+    const pinBox = document.getElementById("pinDisplay");
+
+    if (!manager || manager.accountNo !== acc) {
+      alert("Invalid Account Number");
+      pinBox.textContent = "";
+      return;
+    }
+
+    if (!manager.pin) {
+      pinBox.textContent = "PIN not set yet.";
+    } else {
+      pinBox.textContent = "Your 4-digit PIN: " + manager.pin;
+    }
+  });
+</script>
+
+</body>
+</html>
