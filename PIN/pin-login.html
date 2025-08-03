@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manager PIN Login</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #fff3e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    form {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      width: 300px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #ff6f00;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .error {
+      color: red;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<form id="loginForm">
+  <h3>Login with PIN</h3>
+  <input type="text" id="accountInput" placeholder="Account Number" required>
+  <input type="password" id="pinInput" placeholder="4-digit PIN" maxlength="4" required>
+  <button type="submit">Login</button>
+  <div class="error" id="errorMsg"></div>
+</form>
+
+<script>
+  document.getElementById("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const acc = document.getElementById("accountInput").value;
+    const pin = document.getElementById("pinInput").value;
+
+    const manager = JSON.parse(localStorage.getItem("managerAccount"));
+
+    if (!manager || manager.accountNo !== acc || manager.pin !== pin) {
+      document.getElementById("errorMsg").textContent = "Invalid account number or PIN!";
+      return;
+    }
+
+    window.location.href = "https://sushanta890.github.io/Bank/"; // your home/dashboard page
+  });
+</script>
+
+</body>
+</html>
