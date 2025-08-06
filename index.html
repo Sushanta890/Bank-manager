@@ -3,44 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SK Sushanta</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="nav-bar">
-    <ul>
-      <li><a href="https://sushanta890.github.io/Not-s/">Details</a></li>
-      <li><a href="Bank Manager/home.html">Manager</a></li>
-      <li><a href="https://sushanta890.github.io/Bank/">Bank</a></li>
-      <li><a href="https://sushanta890.github.io/ATM-details/">ATM</a></li>
-    </ul>
-  </div>
+  <div class="wrapper">
+    <video autoplay muted loop playsinline id="bgVideo">
+      <source src="Background.mp4" type="video/mp4" />
+      Your browser does not support HTML5 video.
+    </video>
 
-  <header>
-    <h1 class="typing-text"></h1>
-  </header>
+    <div class="nav-bar">
+      <ul>
+        <li><a href="https://sushanta890.github.io/Not-s/">Details</a></li>
+        <li><a href="Bank Manager/home.html">Manager</a></li>
+        <li><a href="https://sushanta890.github.io/Bank/">Bank</a></li>
+        <li><a href="https://sushanta890.github.io/ATM-details/">ATM</a></li>
+      </ul>
+    </div>
 
-  <main></main>
+    <header>
+      <h1 class="typing-text">S.K Sushanta</h1>
+    </header>
 
-  <footer>
-    <div class="footer-body">
-      <div>Your Brand Here.</div>
-      <div>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-        <ul>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Contact</a></li>
-          <li><a href="https://sushanta890.github.io/Profile-login-pin/">Profile</a></li>
-          <li><a href="#">Terms & Conditions</a></li>
-          <li><a href="#">Privacy Policy</a></li>
-        </ul>
+    <main></main>
+
+    <footer>
+      <div class="footer-body">
+        <div>Your Brand Here.</div>
+        <div>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="https://sushanta890.github.io/Profile-login-pin/">Profile</a></li>
+            <li><a href="#">Terms & Conditions</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
       </div>
-    </div>
-    <div class="footer-copyright">
-      © Copyright goes here.
-    </div>
-  </footer>
+      <div class="footer-copyright">
+        © 2025 SK Sushanta. All rights reserved.
+      </div>
+    </footer>
+  </div>
 
   <script>
     const text = "S.K Sushanta";
@@ -58,7 +65,7 @@
     setTimeout(() => {
       document.querySelector(".typing-text").textContent = "";
       typeWriter();
-    }, 5000); // 5-second delay
+    }, 500);
   </script>
 </body>
 </html>
