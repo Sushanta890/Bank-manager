@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Happy Independence Day 🇮🇳</title>
+<link rel="preload" as="audio" href="desh-bhakti.mp3">
+<style>
+  :root{
+    --saffron:#FF9933;
+    --white:#FFFFFF;
+    --green:#138808;
+    --blue:#1a4ba3;
+    --bg1:#06121b;
+    --bg2:#0b1f2c;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color:#fff; overflow:hidden;
+    background: radial-gradient(1200px 600px at 20% 20%, #0c2434, #02070b 70%),
+                linear-gradient(120deg, var(--bg1), var(--bg2));
+  }
+
+  /* Animated tricolour glow sweep */
+  .tricolour-glow::before{
+    content:""; position:fixed; inset:-30%;
+    background:
+      radial-gradient(600px 300px at 10% 20%, rgba(255,153,51,.25), transparent 60%),
+      radial-gradient(600px 300px at 90% 80%, rgba(19,136,8,.25), transparent 60%),
+      radial-gradient(500px 500px at 50% 50%, rgba(255,255,255,.14), transparent 70%);
+    filter: blur(10px);
+    animation: drift 22s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes drift{
+    0%{transform:translate3d(0,0,0) rotate(0deg)}
+    50%{transform:translate3d(2%, -2%, 0) rotate(180deg)}
+    100%{transform:translate3d(0,0,0) rotate(360deg)}
+  }
+
+  /* Center content */
+  .wrap{
+    position:relative; z-index:2;
+    height:100%; display:grid; place-items:center;
+    padding:24px;
+  }
+
+  /* Card */
+  .card{
+    width:min(920px, 94vw);
+    background: rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.18);
+    border-radius: 20px;
+    backdrop-filter: blur(6px);
+    padding: clamp(18px, 4vw, 28px);
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  }
+
+  /* Heading with flag ribbon underline */
+  .title{
+    margin:0 0 8px; text-align:center;
+    font-weight:800; letter-spacing:.5px;
+    font-size: clamp(24px, 4.5vw, 44px);
+    text-transform:uppercase;
+    text-shadow: 0 3px 16px rgba(0,0,0,.4);
+  }
+  .ribbon{
+    height:10px; border-radius:50px; margin:10px auto 18px; width:min(560px, 80%);
+    background: linear-gradient(90deg, var(--saffron) 0 33.33%, var(--white) 33.33% 66.66%, var(--green) 66.66% 100%);
+    position:relative; overflow:hidden;
+  }
+  .ribbon::after{
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+    transform: translateX(-100%);
+    animation: shine 3.5s ease-in-out infinite;
+  }
+  @keyframes shine{ 0%{transform:translateX(-100%)} 60%{transform:translateX(100%)} 100%{transform:translateX(100%)} }
+
+  /* Typewriter subtitle */
+  .type{
+    width:ch; /* overridden by JS */
+    margin:0 auto; text-align:center;
+    font-size: clamp(14px, 2.6vw, 18px);
+    color: #dbe7ff;
+    white-space:nowrap; border-right:2px solid #dbe7ff;
+    overflow:hidden;
+    animation: caret 750ms steps(1) infinite;
+  }
+  @keyframes caret{50%{border-color:transparent}}
+
+  /* Waving flag */
+  .flagbox{
+    margin: 18px auto 8px;
+    display:flex; gap:16px; align-items:center; justify-content:center;
+    flex-wrap:wrap;
+  }
+  .flag{
+    position:relative; width: 280px; height:160px;
+    perspective: 600px;
+    filter: drop-shadow(0 10px 16px rgba(0,0,0,.35));
+  }
+  .flag .cloth{
+    position:absolute; inset:0; border-radius:6px; overflow:hidden;
+    transform-origin:left; transform-style:preserve-3d;
+    animation: wave 3.5s ease-in-out infinite;
+  }
+  .flag .band{height:33.33%; width:100%}
+  .flag .top{background: var(--saffron)}
+  .flag .mid{background:#fff; position:relative}
+  .flag .bot{background: var(--green)}
+  @keyframes wave{
+    0%,100%{transform: rotateY(-10deg)}
+    50%{transform: rotateY(10deg)}
+  }
+  .pole{
+    width:10px; height:190px; background:linear-gradient(#bbb,#888);
+    border-radius:10px; margin-right:4px;
+    box-shadow: inset 0 0 4px rgba(0,0,0,.4);
+  }
+
+  /* Chakra (SVG) */
+  .chakra{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:54px; height:54px;
+    animation: spin 18s linear infinite;
+    mix-blend-mode: multiply;
+  }
+  @keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+  /* Balloons */
+  .balloons{position:fixed; inset:0; pointer-events:none; z-index:1}
+  .balloon{
+    position:absolute; bottom:-120px; width:28px; height:38px; border-radius:50% 50% 45% 45%;
+    background:#fff; opacity:.9;
+    box-shadow: inset 0 -8px 16px rgba(0,0,0,.15);
+    animation: floatUp 10s linear infinite;
+  }
+  .balloon::after{
+    content:""; position:absolute; left:50%; bottom:-14px; width:2px; height:22px; background:#ddd; transform:translateX(-50%);
+  }
+  .b1{left:8%; background:var(--saffron); animation-delay:0s}
+  .b2{left:22%; background:#fff; animation-delay:1.2s}
+  .b3{left:36%; background:var(--green); animation-delay:2.4s}
+  .b4{left:58%; background:var(--saffron); animation-delay:3.6s}
+  .b5{left:74%; background:#fff; animation-delay:1.8s}
+  .b6{left:88%; background:var(--green); animation-delay:4.5s}
+  @keyframes floatUp{
+    0%{transform:translateY(0) translateX(0) scale(.9); opacity:.0}
+    10%{opacity:.9}
+    50%{transform:translateY(-50vh) translateX(-8px)}
+    100%{transform:translateY(-105vh) translateX(8px); opacity:.2}
+  }
+
+  /* Confetti */
+  .confetti{position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:1}
+  .confetti span{
+    position:absolute; top:-10px; width:8px; height:12px; opacity:.9;
+    animation: fall linear infinite;
+  }
+  @keyframes fall{
+    to{transform: translate3d(var(--x,0px), 110vh, 0) rotate(540deg)}
+  }
+
+  /* Music controls & overlay */
+  .controls{
+    position: fixed; right: 14px; bottom: 14px; z-index: 3;
+    display:flex; gap:8px; align-items:center;
+  }
+  .btn{
+    appearance:none; border:1px solid rgba(255,255,255,.35);
+    background: rgba(255,255,255,.08);
+    color:#fff; padding:10px 14px; border-radius:12px; font-weight:600;
+    backdrop-filter: blur(6px); cursor:pointer;
+  }
+  .btn:active{transform:scale(.98)}
+  .overlay{
+    position:fixed; inset:0; display:none; place-items:center; z-index:4;
+    background: rgba(0,0,0,.5);
+  }
+  .overlay.show{display:grid}
+  .overlay .bubble{
+    background:#0e1c29; border:1px solid rgba(255,255,255,.25);
+    border-radius:16px; padding:18px 20px; text-align:center; max-width: 90vw;
+  }
+  .overlay .bubble b{display:block; margin-bottom:6px; font-size:18px}
+  .credit{
+    text-align:center; margin-top:8px; font-size:12px; opacity:.8
+  }
+</style>
+</head>
+<body class="tricolour-glow">
+
+  <!-- Floating balloons -->
+  <div class="balloons" aria-hidden="true">
+    <div class="balloon b1"></div>
+    <div class="balloon b2"></div>
+    <div class="balloon b3"></div>
+    <div class="balloon b4"></div>
+    <div class="balloon b5"></div>
+    <div class="balloon b6"></div>
+  </div>
+
+  <!-- Gentle confetti (CSS only) -->
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <div class="card">
+      <h1 class="title">Happy Independence Day</h1>
+      <div class="ribbon" aria-hidden="true"></div>
+      <p id="type" class="type" aria-label="15 August • Jai Hind • Vande Mataram"></p>
+
+      <div class="flagbox">
+        <div class="pole" aria-hidden="true"></div>
+        <div class="flag" role="img" aria-label="Indian flag waving">
+          <div class="cloth">
+            <div class="band top"></div>
+            <div class="band mid">
+              <!-- Ashoka Chakra -->
+              <svg class="chakra" viewBox="0 0 100 100" aria-hidden="true">
+                <circle cx="50" cy="50" r="46" fill="none" stroke="var(--blue)" stroke-width="4"/>
+                <!-- 24 spokes -->
+                <g stroke="var(--blue)" stroke-width="3">
+                  <!-- spokes via rotate -->
+                  <!-- We draw one, then clone with transforms using JS later if needed; but static 24 lines: -->
+                  <!-- (Pre-drawn for simplicity) -->
+                  <line x1="50" y1="50" x2="50" y2="6"/>
+                  <line x1="50" y1="50" x2="72.7" y2="10.9" transform="rotate(15 50 50)"/>
+                  <line x1="50" y1="50" x2="88.6" y2="27.3" transform="rotate(30 50 50)"/>
+                  <line x1="50" y1="50" x2="94" y2="50" transform="rotate(45 50 50)"/>
+                  <line x1="50" y1="50" x2="88.6" y2="72.7" transform="rotate(60 50 50)"/>
+                  <line x1="50" y1="50" x2="72.7" y2="89.1" transform="rotate(75 50 50)"/>
+                  <line x1="50" y1="50" x2="50" y2="94" transform="rotate(90 50 50)"/>
+                  <line x1="50" y1="50" x2="27.3" y2="89.1" transform="rotate(105 50 50)"/>
+                  <line x1="50" y1="50" x2="11.4" y2="72.7" transform="rotate(120 50 50)"/>
+                  <line x1="50" y1="50" x2="6" y2="50" transform="rotate(135 50 50)"/>
+                  <line x1="50" y1="50" x2="11.4" y2="27.3" transform="rotate(150 50 50)"/>
+                  <line x1="50" y1="50" x2="27.3" y2="10.9" transform="rotate(165 50 50)"/>
+                  <line x1="50" y1="50" x2="50" y2="6" transform="rotate(180 50 50)"/>
+                  <line x1="50" y1="50" x2="72.7" y2="10.9" transform="rotate(195 50 50)"/>
+                  <line x1="50" y1="50" x2="88.6" y2="27.3" transform="rotate(210 50 50)"/>
+                  <line x1="50" y1="50" x2="94" y2="50" transform="rotate(225 50 50)"/>
+                  <line x1="50" y1="50" x2="88.6" y2="72.7" transform="rotate(240 50 50)"/>
+                  <line x1="50" y1="50" x2="72.7" y2="89.1" transform="rotate(255 50 50)"/>
+                  <line x1="50" y1="50" x2="50" y2="94" transform="rotate(270 50 50)"/>
+                  <line x1="50" y1="50" x2="27.3" y2="89.1" transform="rotate(285 50 50)"/>
+                  <line x1="50" y1="50" x2="11.4" y2="72.7" transform="rotate(300 50 50)"/>
+                  <line x1="50" y1="50" x2="6" y2="50" transform="rotate(315 50 50)"/>
+                  <line x1="50" y1="50" x2="11.4" y2="27.3" transform="rotate(330 50 50)"/>
+                  <line x1="50" y1="50" x2="27.3" y2="10.9" transform="rotate(345 50 50)"/>
+                </g>
+              </svg>
+            </div>
+            <div class="band bot"></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="credit">Made with ❤️ • Jai Hind 🇮🇳</p>
+    </div>
+  </div>
+
+  <!-- Music controls -->
+  <div class="controls" aria-live="polite">
+    <button class="btn" id="toggle">🔊 Mute/Unmute</button>
+    <button class="btn" id="replay">⟲ Restart Music</button>
+  </div>
+
+  <!-- Tap-to-unmute overlay (shown if autoplay with sound is blocked) -->
+  <div class="overlay" id="overlay">
+    <div class="bubble">
+      <b>Tap to play music</b>
+      For your device’s settings, music may require a tap to begin.
+      <div style="margin-top:10px">
+        <button class="btn" id="playNow">▶️ Play Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Background music -->
+  <audio id="bgm" src="Desh Bhakti.mp3" loop preload="auto" playsinline></audio>
+
+<script>
+  // Typewriter text (no flicker)
+  const text = "15 August • Vande Mataram • Jai Hind • भारत माता की जय";
+  const typeEl = document.getElementById('type');
+  let i=0;
+  function typeNext(){
+    typeEl.textContent = text.slice(0, i++);
+    if(i <= text.length) requestAnimationFrame(typeNext);
+    else setTimeout(()=>{ i=0; requestAnimationFrame(typeNext); }, 2200);
+  }
+  typeEl.style.width = (text.length + 1) + "ch";
+  typeNext();
+
+  // Confetti (CSS only pieces, light)
+  const confetti = document.getElementById('confetti');
+  const colours = ["#FF9933","#FFFFFF","#138808","#ffd6a3","#dff5df"];
+  const count = 80;
+  for(let k=0;k<count;k++){
+    const s=document.createElement('span');
+    const size = 6 + Math.random()*6;
+    s.style.width = size+"px";
+    s.style.height = (size*1.2)+"px";
+    s.style.left = Math.random()*100 + "vw";
+    s.style.background = colours[Math.floor(Math.random()*colours.length)];
+    const drift = (Math.random()*80 - 40) + "vw";
+    const dur = 5 + Math.random()*6;
+    s.style.animationDuration = dur+"s";
+    s.style.animationDelay = (Math.random()*4)+"s";
+    s.style.setProperty('--x', drift);
+    confetti.appendChild(s);
+  }
+
+  // Background music: politely try autoplay with sound; if blocked, show overlay.
+  const audio = document.getElementById('bgm');
+  const overlay = document.getElementById('overlay');
+  const playNow = document.getElementById('playNow');
+  const toggleBtn = document.getElementById('toggle');
+  const replayBtn = document.getElementById('replay');
+
+  async function tryPlay(){
+    try{
+      // Some browsers let autoplay if muted first; then we unmute.
+      audio.muted = true;
+      await audio.play();
+      // Briefly play muted, then unmute to continue seamlessly.
+      setTimeout(()=>{ audio.muted = false; }, 200);
+      overlay.classList.remove('show');
+    }catch(e){
+      // Autoplay with sound blocked -> ask user to tap
+      overlay.classList.add('show');
+    }
+  }
+
+  // Attempt on load
+  window.addEventListener('load', tryPlay, {once:true});
+  // Also attempt on first interaction (for tough browsers)
+  const unlock = () => { audio.play().then(()=>overlay.classList.remove('show')).catch(()=>{}); 
+                         window.removeEventListener('touchstart', unlock);
+                         window.removeEventListener('click', unlock);
+                       };
+  window.addEventListener('touchstart', unlock, {once:true, passive:true});
+  window.addEventListener('click', unlock, {once:true});
+
+  playNow.addEventListener('click', async ()=>{
+    try{ await audio.play(); overlay.classList.remove('show'); }catch(e){}
+  });
+
+  toggleBtn.addEventListener('click', ()=>{
+    if(audio.muted || audio.paused){
+      audio.muted = false; audio.play().catch(()=>{});
+    }else{
+      audio.muted = true;
+    }
+  });
+  replayBtn.addEventListener('click', ()=>{
+    audio.currentTime = 0;
+    audio.play().catch(()=>{});
+  });
+</script>
+</body>
+</html>
