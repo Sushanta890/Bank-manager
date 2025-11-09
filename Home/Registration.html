@@ -7,7 +7,7 @@
   <style>
     :root{--bg:#f2f7ff;--card:#fff;--accent:#0066ff;}
     body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);margin:0;padding:24px;}
-    .box{max-width:900px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+    .box{max-width:700px;margin:auto;}
     .card{background:var(--card);padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.1);}
     h2{margin:0 0 10px;}
     label{display:block;margin-top:10px;font-size:14px;}
@@ -79,16 +79,6 @@
       </div>
       <div id="loginMsg" style="color:red;font-size:14px;"></div>
     </div>
-
-    <div class="card">
-      <h2>How to Run</h2>
-      <p>1️⃣ In Termux run:<br>
-        <code>pkg install python</code><br>
-        <code>pip install flask flask-cors</code><br>
-        <code>python server.py</code></p>
-      <p>2️⃣ In SPCK Editor open <b>index.html</b> and <b>profile.html</b>.</p>
-      <p>3️⃣ Change <b>SERVER_URL</b> below to your Termux IP (default 127.0.0.1:5000).</p>
-    </div>
   </div>
 
 <script>
@@ -135,7 +125,7 @@ document.getElementById('searchBtn').onclick=async()=>{
   const res=await fetch(SERVER_URL+'/api/search?mobile='+m);
   const j=await res.json();
   const box=searchResult; box.style.display='block';
-  if(j.found) box.innerHTML=`<b>${j.firstName} ${j.lastName}</b><br>Account: ${j.accountNumber}<br>Customer ID: ${j.customerId}`;
+  if(j.firstName) box.innerHTML=`<b>${j.firstName} ${j.lastName}</b><br>Account: ${j.accountNumber}<br>Customer ID: ${j.customerId}`;
   else box.innerHTML='No record found!';
 };
 
@@ -144,7 +134,7 @@ document.getElementById('loginBtn').onclick=async()=>{
   if(!a)return alert('Enter account number');
   const res=await fetch(SERVER_URL+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({accountNumber:a})});
   const j=await res.json();
-  if(j.found){sessionStorage.setItem('profile',JSON.stringify(j));window.location='profile.html';}
+  if(j.firstName){sessionStorage.setItem('profile',JSON.stringify(j));window.location='profile.html';}
   else loginMsg.textContent='Account not found!';
 };
 </script>
