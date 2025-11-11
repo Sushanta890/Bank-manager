@@ -1,346 +1,164 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>💼 SK Bank — Cash Account (Ledger)</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SK Bank — Cash Ledger</title>
 
 <style>
-  :root {
-    --accent: #0066cc;
-    --bg: #e8f1fc;
-    --table-header: #d7e8ff;
-  }
-
-  body {
-    font-family: "Inter", system-ui, Segoe UI, Roboto, Arial;
-    margin: 0;
-    background: linear-gradient(135deg, #d1eaff, #f3f8ff);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    overflow-x: hidden;
-    animation: fadeIn 1s ease;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 25px;
-    width: 850px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  }
-
-  h2 {
-    text-align: center;
-    color: var(--accent);
-    margin: 0 0 16px;
-    font-size: 24px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-  }
-
-  th, td {
-    border: 1px solid #e5e7eb;
-    padding: 8px;
-    text-align: center;
-  }
-
-  th { background: var(--table-header); }
-
-  .actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 18px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  button {
-    padding: 10px 14px;
-    border: 0;
-    border-radius: 8px;
-    cursor: pointer;
-    color: #fff;
-    background: var(--accent);
-    transition: 0.3s;
-  }
-
-  button:hover { opacity: 0.9; transform: scale(1.05); }
-
-  .logout { background: #e11d48; }
-  .kyc { background: #22c55e; }
-
-  .deposit-box {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin-top: 10px;
-  }
-
-  .deposit-box input {
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    width: 120px;
-  }
-
-  .success { color: green; text-align: center; margin-top: 10px; }
-  .error { color: red; text-align: center; margin-top: 10px; }
-
-  .totals {
-    text-align: right;
-    margin-top: 10px;
-    font-weight: 600;
-  }
-
-  #bankLogo {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    display: block;
-    margin: 0 auto 8px;
-  }
+body {
+  font-family: Arial, sans-serif;
+  background: #eef5ff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 850px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+h2 {
+  text-align: center;
+  color: #0066cc;
+  margin-top: 10px;
+}
+#bankLogo {
+  display: block;
+  margin: 0 auto;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+th {
+  background: #d7e8ff;
+  color: #003366;
+}
+button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-top: 15px;
+}
+button:hover {
+  opacity: 0.9;
+}
 </style>
 </head>
 
 <body>
-  <div class="card">
-    <img id="bankLogo" src="https://i.ibb.co/ZK3X7Ln/skbank-logo.png" alt="SK Bank Logo">
-    <h2>💼 SK BANK — CASH ACCOUNT (LEDGER)</h2>
-    <div id="userInfo"></div>
+<div class="card">
+  <img id="bankLogo" src="https://i.ibb.co/ZK3X7Ln/skbank-logo.png" alt="SK Bank Logo">
+  <h2>💼 SK BANK — CASH ACCOUNT LEDGER</h2>
 
-    <div class="deposit-box">
-      <label>Deposit Amount (₹):</label>
-      <input type="number" id="depAmt" min="1" />
-      <button id="depositBtn">Deposit</button>
-    </div>
-    <div id="msg"></div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Date & Time</th>
-          <th>Particulars</th>
-          <th>Type</th>
-          <th>Debit (₹)</th>
-          <th>Credit (₹)</th>
-        </tr>
-      </thead>
-      <tbody id="ledgerBody">
-        <tr><td colspan="5">No transactions yet</td></tr>
-      </tbody>
-    </table>
-
-    <div id="totals" class="totals"></div>
-
-    <div class="actions">
-      <button id="back" class="kyc">KYC</button>
-      <button id="downloadPDF">📄 Download PDF</button>
-      <button id="logout" class="logout">Logout</button>
-    </div>
+  <div id="userInfo">Account Holder: <b>John Doe</b><br>
+    Account No: <b>1234567890</b> | Customer ID: <b>SK12345</b><br>
+    Balance: <b>₹10,000.00</b>
   </div>
 
-  <!-- ✅ jsPDF CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <table id="ledgerTable">
+    <thead>
+      <tr>
+        <th>Date & Time</th>
+        <th>Particulars</th>
+        <th>Type</th>
+        <th>Debit (₹)</th>
+        <th>Credit (₹)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>11-11-2025 12:15 PM</td><td>Cash Deposit</td><td>Deposit</td><td></td><td>₹5000.00</td></tr>
+      <tr><td>11-11-2025 1:00 PM</td><td>Room Rent</td><td>Payment</td><td>₹2000.00</td><td></td></tr>
+    </tbody>
+  </table>
 
-  <script>
-    // Wait for page to load
-    window.onload = function() {
+  <button id="downloadPDF">📄 Download PDF</button>
+</div>
 
-      const ACC_KEY = 'skbank_accounts_v1';
-      const TX_KEY = 'skbank_tx_v1';
-      const userAcc = localStorage.getItem('skbank_loggedIn');
+<!-- ✅ jsPDF + AutoTable CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
 
-      if (!userAcc) {
-        alert('Please login first');
-        location.href = 'login.html';
-      }
+<script>
+document.getElementById('downloadPDF').addEventListener('click', async () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "pt", "a4");
 
-      const loadAccounts = () => JSON.parse(localStorage.getItem(ACC_KEY) || '[]');
-      const saveAccounts = arr => localStorage.setItem(ACC_KEY, JSON.stringify(arr));
-      const loadTx = () => JSON.parse(localStorage.getItem(TX_KEY) || '[]');
-      const saveTx = arr => localStorage.setItem(TX_KEY, JSON.stringify(arr));
+  // Logo conversion fix (Base64)
+  const logo = await toDataURL("https://i.ibb.co/ZK3X7Ln/skbank-logo.png");
 
-      let accounts = loadAccounts();
-      let user = accounts.find(a => a.accNum === userAcc);
+  // Blue Header
+  doc.setFillColor(0, 102, 204);
+  doc.rect(0, 0, 600, 80, "F");
 
-      const refreshInfo = () => {
-        document.getElementById('userInfo').innerHTML = `
-          <b>${user.fname} ${user.lname}</b> — A/C: ${user.accNum}<br>
-          Customer ID: ${user.custId}<br>
-          <b>Balance: ₹${user.balance.toFixed(2)}</b>
-        `;
-      };
+  // Logo & Title
+  doc.addImage(logo, "PNG", 40, 20, 40, 40);
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(18);
+  doc.text("💼 SK BANK — CASH ACCOUNT LEDGER", 100, 50);
 
-      const renderLedger = () => {
-        const txs = loadTx().filter(t => t.from === user.accNum || t.to === user.accNum);
-        const body = document.getElementById('ledgerBody');
-        const totalsDiv = document.getElementById('totals');
+  // User Info
+  doc.setFontSize(12);
+  doc.setTextColor(0,0,0);
+  doc.text("Account Holder: John Doe", 40, 110);
+  doc.text("Account No: 1234567890", 300, 110);
+  doc.text("Customer ID: SK12345", 40, 130);
+  doc.text("Balance: ₹10,000.00", 300, 130);
 
-        if (txs.length === 0) {
-          body.innerHTML = '<tr><td colspan="5">No transactions yet</td></tr>';
-          totalsDiv.innerHTML = '';
-          return;
-        }
+  // Table
+  const table = document.getElementById("ledgerTable");
+  const rows = [];
+  table.querySelectorAll("tbody tr").forEach(tr => {
+    const cells = tr.querySelectorAll("td");
+    rows.push([
+      cells[0].innerText, cells[1].innerText, cells[2].innerText,
+      cells[3].innerText, cells[4].innerText
+    ]);
+  });
 
-        let totalDebit = 0, totalCredit = 0;
-        body.innerHTML = txs.map(t => {
-          const date = new Date(t.date).toLocaleString();
-          const debit = t.from === user.accNum ? t.amount : 0;
-          const credit = t.to === user.accNum ? t.amount : 0;
-          if (debit > 0) totalDebit += debit;
-          if (credit > 0) totalCredit += credit;
-          return `<tr>
-            <td>${date}</td>
-            <td>${t.particular}</td>
-            <td>${t.type}</td>
-            <td>${debit ? "₹" + debit.toFixed(2) : ""}</td>
-            <td>${credit ? "₹" + credit.toFixed(2) : ""}</td>
-          </tr>`;
-        }).join('');
+  doc.autoTable({
+    startY: 150,
+    head: [['Date & Time', 'Particulars', 'Type', 'Debit (₹)', 'Credit (₹)']],
+    body: rows,
+    styles: { halign: "center", valign: "middle", fontSize: 10 },
+    headStyles: { fillColor: [0, 102, 204], textColor: 255 },
+    alternateRowStyles: { fillColor: [240, 248, 255] },
+  });
 
-        totalsDiv.innerHTML = `
-          Total Debit: ₹${totalDebit.toFixed(2)} | 
-          Total Credit: ₹${totalCredit.toFixed(2)} | 
-          Current Balance: ₹${user.balance.toFixed(2)}
-        `;
-      };
+  const y = doc.lastAutoTable.finalY + 30;
+  doc.setTextColor(0,0,128);
+  doc.setFont("helvetica", "bold");
+  doc.text("Generated on: " + new Date().toLocaleString(), 40, y);
 
-      refreshInfo();
-      renderLedger();
+  // Save file
+  doc.save("SKBank_Statement.pdf");
+});
 
-      // ✅ Deposit Feature
-      document.getElementById('depositBtn').addEventListener('click', () => {
-        const amt = parseFloat(document.getElementById('depAmt').value);
-        const msg = document.getElementById('msg');
-
-        if (isNaN(amt) || amt <= 0) {
-          msg.innerHTML = '<div class="error">Enter a valid amount!</div>';
-          return;
-        }
-
-        const idx = accounts.findIndex(a => a.accNum === user.accNum);
-        if (idx !== -1) {
-          accounts[idx].balance += amt;
-          saveAccounts(accounts);
-        }
-        user.balance += amt;
-
-        const txs = loadTx();
-        txs.push({
-          from: 'CASH',
-          to: user.accNum,
-          amount: amt,
-          type: 'Deposit',
-          particular: 'Cash Deposit',
-          date: new Date().toISOString()
-        });
-        saveTx(txs);
-
-        document.getElementById('depAmt').value = '';
-        msg.innerHTML = `<div class="success">✅ ₹${amt.toFixed(2)} deposited successfully!</div>`;
-        refreshInfo();
-        renderLedger();
-        setTimeout(() => (msg.innerHTML = ''), 4000);
-      });
-
-      // ✅ PDF Button — FIXED
-      document.getElementById('downloadPDF').addEventListener('click', async () => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
-
-        const logo = document.getElementById('bankLogo');
-        const img = await toDataURL(logo.src);
-
-        doc.addImage(img, "PNG", 40, 30, 50, 50);
-        doc.setFontSize(18);
-        doc.setTextColor(0, 102, 204);
-        doc.text("SK BANK — CASH ACCOUNT STATEMENT", 110, 60);
-
-        let y = 110;
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Name: ${user.fname} ${user.lname}`, 40, y);
-        doc.text(`Account No: ${user.accNum}`, 300, y);
-        y += 15;
-        doc.text(`Customer ID: ${user.custId}`, 40, y);
-        y += 20;
-
-        doc.setFont("helvetica", "bold");
-        doc.setFillColor(230, 240, 255);
-        doc.rect(40, y - 10, 500, 20, "F");
-        doc.text("Date & Time", 45, y);
-        doc.text("Particulars", 150, y);
-        doc.text("Type", 280, y);
-        doc.text("Debit", 380, y);
-        doc.text("Credit", 450, y);
-        y += 20;
-
-        doc.setFont("helvetica", "normal");
-        let totalDebit = 0, totalCredit = 0;
-        const txs = loadTx().filter(t => t.from === user.accNum || t.to === user.accNum);
-
-        txs.forEach(t => {
-          const date = new Date(t.date).toLocaleString();
-          const debit = t.from === user.accNum ? t.amount : 0;
-          const credit = t.to === user.accNum ? t.amount : 0;
-          if (debit > 0) totalDebit += debit;
-          if (credit > 0) totalCredit += credit;
-
-          doc.text(date, 45, y);
-          doc.text(t.particular || "", 150, y);
-          doc.text(t.type || "", 280, y);
-          if (debit > 0) doc.text("₹" + debit.toFixed(2), 380, y);
-          if (credit > 0) doc.text("₹" + credit.toFixed(2), 450, y);
-          y += 15;
-          if (y > 750) { doc.addPage(); y = 60; }
-        });
-
-        y += 20;
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(0, 102, 204);
-        doc.text(`Total Debit: ₹${totalDebit.toFixed(2)}`, 45, y);
-        doc.text(`Total Credit: ₹${totalCredit.toFixed(2)}`, 200, y);
-        doc.text(`Balance: ₹${user.balance.toFixed(2)}`, 380, y);
-        y += 40;
-        doc.setFontSize(9);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Generated on: ${new Date().toLocaleString()}`, 45, y);
-
-        doc.save(`SKBank_Statement_${user.accNum}.pdf`);
-      });
-
-      // Convert Image to Base64
-      function toDataURL(url) {
-        return fetch(url)
-          .then(res => res.blob())
-          .then(blob => new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-          }));
-      }
-
-      document.getElementById('logout').onclick = () => {
-        localStorage.removeItem('skbank_loggedIn');
-        location.href = 'home login.html';
-      };
-
-      document.getElementById('back').onclick = () => location.href = 'Editing.html';
-    };
-  </script>
+// Convert logo to Base64 (for mobile fix)
+function toDataURL(url) {
+  return fetch(url)
+    .then(res => res.blob())
+    .then(blob => new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(blob);
+    }));
+}
+</script>
 </body>
 </html>
