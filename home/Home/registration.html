@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fast Registration — SK Bank</title>
+  <style>
+    :root{--accent:#6c5ce7;--bg:#f7f7fb}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;min-height:100vh}
+    .card{background:white;border-radius:12px;padding:22px;box-shadow:0 6px 20px rgba(34,41,47,0.08);width:420px}
+    h1{font-size:20px;margin:0 0 14px}
+    label{display:block;font-size:13px;margin:10px 0 6px}
+    input[type="text"],input[type="email"],input[type="password"],input[type="tel"]{width:100%;padding:10px;border:1px solid #e6e7ee;border-radius:8px;font-size:14px}
+    .row{display:flex;gap:10px}
+    .row input{flex:1}
+    .muted{font-size:13px;color:#6b7280;margin-top:8px}
+    .actions{display:flex;gap:8px;margin-top:14px}
+    button{padding:10px 12px;border-radius:8px;border:0;background:var(--accent);color:white;cursor:pointer}
+    .secondary{background:#eef2ff;color:#333}
+    .note{font-size:13px;color:#111827;margin-top:12px}
+    .success{background:#ecfdf5;border-left:4px solid #10b981;padding:10px;border-radius:6px;margin-top:12px}
+    .error{background:#fff1f2;border-left:4px solid #ef4444;padding:10px;border-radius:6px;margin-top:12px}
+    .small{font-size:12px;color:#374151}
+    .search{display:flex;gap:8px;margin-top:18px}
+    .badge{display:inline-block;padding:6px 8px;border-radius:8px;background:#f3f4f6;font-weight:600}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Open Account — Fast Registration</h1>
+    <form id="regForm" autocomplete="off">
+      <div class="row">
+        <div>
+          <label for="fname">First name</label>
+          <input id="fname" name="fname" type="text" required />
+        </div>
+        <div>
+          <label for="lname">Last name</label>
+          <input id="lname" name="lname" type="text" required />
+        </div>
+      </div>
+
+      <label for="mobile">Mobile number</label>
+      <input id="mobile" name="mobile" type="tel" placeholder="10-digit mobile" pattern="\d{10}" required />
+
+      <label for="email">Email ID</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" required />
+
+      <div class="row">
+        <div>
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" minlength="4" required />
+        </div>
+        <div>
+          <label for="confirm">Confirm password</label>
+          <input id="confirm" name="confirm" type="password" minlength="4" required />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit">Register & Save</button>
+      </div>
+
+      <div id="msg" role="status"></div>
+
+    </form>
+
+    <div class="note">Already registered? Find account by mobile number below.</div>
+    <div class="search">
+      <input id="searchMobile" placeholder="Enter mobile to search" />
+      <button id="searchBtn" class="secondary">Search</button>
+    </div>
+    <div id="searchResult" style="margin-top:10px"></div>
+
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const STORAGE_KEY = 'skbank_accounts_v1';
+
+    function loadAccounts(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      }catch(e){ return [] }
+    }
+    function saveAccounts(arr){ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)) }
+
+    function generateAccountNumber(){
+      const time = Date.now().toString().slice(-8);
+      const rnd = ('00'+Math.floor(Math.random()*100)).slice(-2);
+      return time + rnd + Math.floor(Math.random()*10);
+    }
+    function generateCustomerId(){
+      const alpha = 'SK';
+      const num = Math.floor(10000000 + Math.random()*90000000);
+      return alpha + num;
+    }
+
+    document.getElementById('regForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      const fname = $('fname').value.trim();
+      const lname = $('lname').value.trim();
+      const mobile = $('mobile').value.trim();
+      const email = $('email').value.trim();
+      const password = $('password').value;
+      const confirm = $('confirm').value;
+
+      if(!/^\d{10}$/.test(mobile)) return showError('Enter a valid 10-digit mobile number');
+      if(password !== confirm) return showError('Passwords do not match');
+
+      const accounts = loadAccounts();
+      if(accounts.some(a=>a.mobile === mobile)) return showError('Mobile number already registered');
+
+      const rec = {
+        fname, lname, mobile, email,
+        accNum: generateAccountNumber(),
+        custId: generateCustomerId(),
+        createdAt: new Date().toISOString(),
+        password
+      };
+
+      accounts.push(rec);
+      saveAccounts(accounts);
+      showSuccess('Account registered successfully!');
+      clearForm();
+    });
+
+    function clearForm(){ $('regForm').reset(); }
+
+    function showSuccess(txt){
+      $('msg').innerHTML = `<div class="success">${txt}</div>`;
+      setTimeout(()=>{ $('msg').innerHTML = '' }, 3500);
+    }
+    function showError(txt){
+      $('msg').innerHTML = `<div class="error">${txt}</div>`;
+      setTimeout(()=>{ $('msg').innerHTML = '' }, 5000);
+    }
+
+    $('searchBtn').addEventListener('click', ()=>{
+      const q = $('searchMobile').value.trim();
+      if(!/^\d{10}$/.test(q)) return showError('Enter a valid 10-digit mobile to search');
+      const accounts = loadAccounts();
+      const found = accounts.find(a=>a.mobile === q);
+      const out = $('searchResult');
+      if(!found){ out.innerHTML = `<div class="small">No account found for <strong>${q}</strong></div>`; return }
+      out.innerHTML = `
+        <div style="padding:10px;border-radius:8px;background:#f8fafc">
+          <div class="small"><strong>${found.fname} ${found.lname}</strong></div>
+          <div class="small">Mobile: ${found.mobile}</div>
+          <div class="small">Email: ${found.email}</div>
+          <div style="margin-top:6px">
+            <div class="small">Account number: <span style="font-weight:700">${found.accNum}</span></div>
+            <div class="small">Customer ID: <span style="font-weight:700">${found.custId}</span></div>
+          </div>
+          <div class="small" style="margin-top:6px">Created: ${new Date(found.createdAt).toLocaleString()}</div>
+        </div>`;
+    });
+  </script>
+</body>
+</html>

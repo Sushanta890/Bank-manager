@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏦 SK Bank — Home</title>
+  <style>
+    /* 🌈 Background Animation */
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      overflow: hidden;
+      background: linear-gradient(270deg, #0066ff, #00cc99, #ff6600, #cc33ff);
+      background-size: 800% 800%;
+      animation: gradientShift 12s ease infinite;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* 🔹 Top Navigation Bar */
+    .navbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 15px 0;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: 1px;
+      font-size: 18px;
+      padding: 10px 20px;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+    }
+    .navbar a:hover {
+      background: rgba(255,255,255,0.2);
+      box-shadow: 0 0 12px white;
+      transform: scale(1.1);
+    }
+
+    /* 🏦 Center Content */
+    .hero {
+      text-align: center;
+      animation: fadeIn 1.5s ease-in;
+    }
+    .hero h1 {
+      font-size: 50px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(255,255,255,0.8);
+    }
+    .hero p {
+      font-size: 20px;
+      opacity: 0.9;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ✨ Floating Animation */
+    .floating {
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <a href="/index.html">🏠 Home</a>
+    <a href="Home/registration.html">📝 Registration</a>
+    <a href="Home/login.html">🔐 Login</a>
+    <a href="Home/home login.html">🏦 Bank Dashboard</a>
+  </div>
+
+  <div class="hero floating">
+    <h1>Welcome to <span style="color: #fff700;">SK Bank</span></h1>
+    <p>Secure • Fast • Smart Banking System</p>
+  </div>
+
+  <script>
+    // Simple entry animation on load
+    window.addEventListener('load', ()=>{
+      document.body.style.opacity = '1';
+    });
+  </script>
+</body>
+</html>

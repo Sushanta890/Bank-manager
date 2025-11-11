@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SK Bank — Cash Account (Ledger)</title>
+  <style>
+    :root{--accent:#0066cc;--bg:#f3f6fb}
+    body{
+      font-family:Inter,system-ui,Segoe UI,Roboto,Arial;
+      margin:0;background:var(--bg);
+      display:flex;align-items:center;justify-content:center;
+      min-height:100vh;padding:20px;
+    }
+    .card{
+      background:#fff;border-radius:12px;padding:22px;width:850px;
+      box-shadow:0 8px 25px rgba(13,38,76,0.08);
+    }
+    h2{text-align:center;margin:0 0 16px}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border:1px solid #e5e7eb;padding:8px;text-align:center}
+    th{background:#eef6ff}
+    .actions{display:flex;justify-content:space-between;align-items:center;margin-top:18px;flex-wrap:wrap;gap:10px}
+    button{padding:10px 14px;border:0;border-radius:8px;cursor:pointer;color:#fff;background:var(--accent)}
+    .logout{background:#e11d48}
+    .deposit-box{display:flex;gap:8px;align-items:center;margin-top:10px}
+    .deposit-box input{padding:8px;border-radius:6px;border:1px solid #d1d5db;width:120px}
+    .success{color:green;text-align:center;margin-top:10px}
+    .error{color:red;text-align:center;margin-top:10px}
+    .totals{text-align:right;margin-top:10px;font-weight:600}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>💼 Cash Account (Ledger)</h2>
+    <div id="userInfo"></div>
+
+    <div class="deposit-box">
+      <label>Deposit Amount (₹):</label>
+      <input type="number" id="depAmt" min="1" />
+      <button id="depositBtn">Deposit</button>
+    </div>
+    <div id="msg"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Particulars</th>
+          <th>Type</th>
+          <th>Debit (₹)</th>
+          <th>Credit (₹)</th>
+        </tr>
+      </thead>
+      <tbody id="ledgerBody">
+        <tr><td colspan="5">No transactions yet</td></tr>
+      </tbody>
+    </table>
+
+    <div id="totals" class="totals"></div>
+
+    <div class="actions">
+      <button id="back">⬅ Back to Login</button>
+      <button id="downloadPDF">📄 Download PDF</button>
+      <button id="logout" class="logout">Logout</button>
+    </div>
+  </div>
+
+  <!-- ✅ jsPDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+    const ACC_KEY = 'skbank_accounts_v1';
+    const TX_KEY = 'skbank_tx_v1';
+    const userAcc = localStorage.getItem('skbank_loggedIn');
+
+    if(!userAcc){
+      alert('Please login first');
+      location.href = 'login.html';
+    }
+
+    const loadAccounts = () => JSON.parse(localStorage.getItem(ACC_KEY) || '[]');
+    const saveAccounts = arr => localStorage.setItem(ACC_KEY, JSON.stringify(arr));
+    const loadTx = () => JSON.parse(localStorage.getItem(TX_KEY) || '[]');
+    const saveTx = arr => localStorage.setItem(TX_KEY, JSON.stringify(arr));
+
+    let accounts = loadAccounts();
+    const user = accounts.find(a => a.accNum === userAcc);
+
+    const refreshInfo = () => {
+      document.getElementById('userInfo').innerHTML =
+        `<b>${user.fname} ${user.lname}</b> — A/C: ${user.accNum}<br>
+        Customer ID: ${user.custId}<br>
+        <b>Balance: ₹${user.balance.toFixed(2)}</b>`;
+    };
+
+    const renderLedger = () => {
+      const txs = loadTx().filter(t => t.from===user.accNum || t.to===user.accNum);
+      const body = document.getElementById('ledgerBody');
+      const totalsDiv = document.getElementById('totals');
+
+      if(txs.length === 0){
+        body.innerHTML = '<tr><td colspan="5">No transactions yet</td></tr>';
+        totalsDiv.innerHTML = '';
+        return;
+      }
+
+      let totalDebit = 0, totalCredit = 0;
+      body.innerHTML = txs.map(t=>{
+        const date = new Date(t.date).toLocaleString();
+        const debit = t.from===user.accNum ? t.amount : 0;
+        const credit = t.to===user.accNum ? t.amount : 0;
+        if(debit>0) totalDebit += debit;
+        if(credit>0) totalCredit += credit;
+        return `<tr>
+          <td>${date}</td>
+          <td>${t.particular}</td>
+          <td>${t.type}</td>
+          <td>${debit ? "₹"+debit.toFixed(2) : ""}</td>
+          <td>${credit ? "₹"+credit.toFixed(2) : ""}</td>
+        </tr>`;
+      }).join('');
+
+      totalsDiv.innerHTML = `
+        Total Debit: ₹${totalDebit.toFixed(2)} | 
+        Total Credit: ₹${totalCredit.toFixed(2)} | 
+        Current Balance: ₹${user.balance.toFixed(2)}
+      `;
+
+      return { txs, totalDebit, totalCredit };
+    };
+
+    refreshInfo();
+    const { txs: initialTxs } = renderLedger();
+
+    // ✅ Deposit Feature
+    document.getElementById('depositBtn').addEventListener('click', () => {
+      const amt = parseFloat(document.getElementById('depAmt').value);
+      const msg = document.getElementById('msg');
+      if(isNaN(amt) || amt <= 0){
+        msg.innerHTML = '<div class="error">Enter a valid amount!</div>';
+        return;
+      }
+
+      user.balance += amt;
+      saveAccounts(accounts);
+
+      // Save transaction
+      const txs = loadTx();
+      txs.push({
+        from: 'CASH',
+        to: user.accNum,
+        amount: amt,
+        type: 'Deposit',
+        particular: 'Cash Deposit',
+        date: new Date().toISOString()
+      });
+      saveTx(txs);
+
+      document.getElementById('depAmt').value = '';
+      msg.innerHTML = `<div class="success">✅ ₹${amt.toFixed(2)} deposited successfully!</div>`;
+      refreshInfo();
+      renderLedger();
+      setTimeout(()=> msg.innerHTML='', 4000);
+    });
+
+    // ✅ PDF Download
+    document.getElementById('downloadPDF').addEventListener('click', async () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+      const txs = loadTx().filter(t => t.from===user.accNum || t.to===user.accNum);
+
+      let y = 40;
+      doc.setFontSize(16);
+      doc.text("SK BANK — Cash Account Statement", 180, y);
+      y += 25;
+      doc.setFontSize(11);
+      doc.text(`Name: ${user.fname} ${user.lname}`, 40, y);
+      doc.text(`Account No: ${user.accNum}`, 300, y);
+      y += 15;
+      doc.text(`Customer ID: ${user.custId}`, 40, y);
+      y += 20;
+
+      // Table Header
+      doc.setFont("helvetica", "bold");
+      doc.text("Date & Time", 40, y);
+      doc.text("Particulars", 150, y);
+      doc.text("Type", 300, y);
+      doc.text("Debit", 400, y);
+      doc.text("Credit", 470, y);
+      y += 10;
+      doc.setLineWidth(0.5);
+      doc.line(40, y, 550, y);
+      y += 15;
+
+      doc.setFont("helvetica", "normal");
+      let totalDebit = 0, totalCredit = 0;
+      txs.forEach(t => {
+        const date = new Date(t.date).toLocaleString();
+        const debit = t.from===user.accNum ? t.amount : 0;
+        const credit = t.to===user.accNum ? t.amount : 0;
+        if(debit>0) totalDebit += debit;
+        if(credit>0) totalCredit += credit;
+
+        doc.text(date, 40, y, { maxWidth: 100 });
+        doc.text(t.particular || "", 150, y, { maxWidth: 130 });
+        doc.text(t.type || "", 300, y);
+        if(debit>0) doc.text("₹"+debit.toFixed(2), 400, y);
+        if(credit>0) doc.text("₹"+credit.toFixed(2), 470, y);
+        y += 15;
+        if(y > 750){ doc.addPage(); y = 50; }
+      });
+
+      y += 20;
+      doc.setFont("helvetica", "bold");
+      doc.text(`Total Debit: ₹${totalDebit.toFixed(2)}`, 40, y);
+      doc.text(`Total Credit: ₹${totalCredit.toFixed(2)}`, 220, y);
+      doc.text(`Balance: ₹${user.balance.toFixed(2)}`, 400, y);
+      y += 40;
+      doc.setFontSize(9);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 40, y);
+
+      doc.save(`SKBank_Statement_${user.accNum}.pdf`);
+    });
+
+    // Logout and back
+    document.getElementById('logout').onclick = ()=>{
+      localStorage.removeItem('skbank_loggedIn');
+      location.href = 'home login.html';
+    };
+    document.getElementById('back').onclick = ()=> location.href = 'login.html';
+  </script>
+</body>
+</html>
