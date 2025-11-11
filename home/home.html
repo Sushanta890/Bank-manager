@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SK Bank — Home</title>
+
+<style>
+:root {
+  --accent: #0066cc;
+  --bg1: #e0f7ff;
+  --bg2: #f4f8ff;
+  --card-bg: #ffffffcc;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+  background-size: 400% 400%;
+  animation: bgMove 8s ease-in-out infinite;
+}
+
+/* Background animation */
+@keyframes bgMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Header */
+header {
+  text-align: center;
+  padding: 30px 10px;
+  color: var(--accent);
+  font-size: 2em;
+  font-weight: 700;
+  letter-spacing: 1px;
+  animation: fadeInDown 1.5s ease-in-out;
+}
+
+/* Gallery grid */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  width: 90%;
+  max-width: 1000px;
+  margin-top: 20px;
+}
+
+/* Image card */
+.card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  background: var(--card-bg);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  transition: all 0.4s ease;
+  cursor: pointer;
+  animation: float 4s ease-in-out infinite;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 35px rgba(0,102,204,0.4);
+}
+
+.card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.card:hover img {
+  transform: scale(1.1);
+}
+
+.card .caption {
+  text-align: center;
+  padding: 12px;
+  color: #fff;
+  font-weight: 600;
+  background: rgba(0,102,204,0.85);
+  font-size: 1.1em;
+}
+
+/* Info box below gallery */
+.info-box {
+  margin-top: 25px;
+  text-align: center;
+  background: rgba(255,255,255,0.85);
+  padding: 25px;
+  border-radius: 12px;
+  width: 85%;
+  max-width: 800px;
+  box-shadow: 0 8px 25px rgba(0,102,204,0.2);
+  opacity: 0;
+  transform: translateY(-30px);
+  transition: all 0.6s ease;
+}
+
+.info-box.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.info-box h2 {
+  color: var(--accent);
+  margin-bottom: 8px;
+  font-size: 1.5em;
+}
+
+.info-box p {
+  color: #333;
+  font-size: 1em;
+  line-height: 1.6;
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes touchDown {
+  0% { transform: translateY(-10px) scale(1); }
+  50% { transform: translateY(15px) scale(0.98); }
+  100% { transform: translateY(0) scale(1); }
+}
+</style>
+</head>
+
+<body>
+<header>💼 Welcome to SK Bank</header>
+
+<!-- Gallery of 4 members -->
+<div class="gallery">
+  <div class="card" onclick="showInfo(0, this)">
+    <img src="image/Sushanta.jpg" alt="K. Sushanta">
+    <div class="caption">K. Sushanta</div>
+  </div>
+
+  <div class="card" onclick="showInfo(1, this)">
+    <img src="image/Naresh.png" alt="Naresh">
+    <div class="caption">Naresh</div>
+  </div>
+
+  <div class="card" onclick="showInfo(2, this)">
+    <img src="image/Kameswar.png" alt="K. Kameshwar">
+    <div class="caption">K. Kameshwar</div>
+  </div>
+
+  <div class="card" onclick="showInfo(3, this)">
+    <img src="image/Keshab.jpg" alt="Keshab">
+    <div class="caption">Keshab</div>
+  </div>
+</div>
+
+<!-- Info section -->
+<div class="info-box" id="info-box">
+  <h2>Tap any image above 👆</h2>
+  <p>View detailed information about SK Bank team members with animation effects.</p>
+</div>
+
+<script>
+const infoBox = document.getElementById("info-box");
+
+const teamInfo = [
+  {
+    name: "K. Sushanta — Marketing Management",
+    desc: "Responsible for planning, organizing, and implementing marketing strategies for SK Bank’s growth. Oversees promotions, customer engagement, and public relations with innovative digital campaigns and data-driven decision-making."
+  },
+  {
+    name: "Naresh — Room Management",
+    desc: "Ensures smooth accommodation operations for SK Bank’s internal departments. Manages booking, maintenance, and logistics with precision and accountability, maintaining comfort and order in the working environment."
+  },
+  {
+    name: "K. Kameshwar — Bank Manager",
+    desc: "Leads SK Bank’s financial operations and customer services. Supervises staff, maintains regulatory compliance, and ensures high service quality. Focused on innovation, customer trust, and institutional growth."
+  },
+  {
+    name: "Keshab — Finance & Ledger Analyst",
+    desc: "Handles the bank’s ledger and cash accounts with accuracy. Maintains balance sheets, transaction records, and ensures transparent reporting aligned with financial best practices."
+  }
+];
+
+function showInfo(i, element) {
+  // animate touch down effect on clicked image
+  element.style.animation = "touchDown 0.6s ease";
+  setTimeout(() => { element.style.animation = ""; }, 600);
+
+  // update info box
+  infoBox.classList.remove("show");
+  setTimeout(() => {
+    infoBox.innerHTML = `
+      <h2>${teamInfo[i].name}</h2>
+      <p>${teamInfo[i].desc}</p>
+    `;
+    infoBox.classList.add("show");
+  }, 400);
+}
+</script>
+
+</body>
+</html>
