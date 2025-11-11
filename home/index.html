@@ -4,8 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🏦 SK Bank — Home</title>
+
   <style>
-    /* 🌈 Background Animation */
+    /* 🌈 BACKGROUND ANIMATION SECTION
+       ---------------------------------
+       This creates a smooth animated background using gradient colors.
+       The background color shifts between multiple colors infinitely.
+    */
     body {
       margin: 0;
       height: 100vh;
@@ -15,20 +20,23 @@
       align-items: center;
       justify-content: center;
       color: white;
-      overflow: hidden;
+      overflow-y: auto;
       background: linear-gradient(270deg, #0066ff, #00cc99, #ff6600, #cc33ff);
       background-size: 800% 800%;
       animation: gradientShift 12s ease infinite;
+      scroll-behavior: smooth;
     }
+
+    /* Defines the color movement direction and timing */
     @keyframes gradientShift {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
 
-    /* 🔹 Top Navigation Bar */
+    /* 🔹 TOP NAVIGATION BAR SECTION */
     .navbar {
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
@@ -39,7 +47,10 @@
       gap: 30px;
       padding: 15px 0;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      z-index: 10;
     }
+
+    /* Navigation link design */
     .navbar a {
       color: white;
       text-decoration: none;
@@ -50,25 +61,29 @@
       border-radius: 25px;
       transition: all 0.3s ease;
     }
+
     .navbar a:hover {
       background: rgba(255,255,255,0.2);
       box-shadow: 0 0 12px white;
       transform: scale(1.1);
     }
 
-    /* 🏦 Center Content */
+    /* 🏦 MAIN HERO SECTION */
     .hero {
       text-align: center;
+      margin-top: 120px;
       animation: fadeIn 1.5s ease-in;
     }
+
     .hero h1 {
-      font-size: 50px;
+      font-size: 52px;
       margin-bottom: 10px;
       text-shadow: 0 0 20px rgba(255,255,255,0.8);
     }
+
     .hero p {
-      font-size: 20px;
-      opacity: 0.9;
+      font-size: 22px;
+      opacity: 0.95;
     }
 
     @keyframes fadeIn {
@@ -76,17 +91,69 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ✨ Floating Animation */
     .floating {
       animation: float 3s ease-in-out infinite;
     }
+
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-10px); }
     }
+
+    /* 🧾 ABOUT SECTION */
+    .about {
+      max-width: 850px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      padding: 30px 40px;
+      margin-top: 50px;
+      line-height: 1.7;
+      font-size: 18px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      animation: fadeIn 1.5s ease-in;
+    }
+
+    .about h2 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 15px rgba(255,255,255,0.9);
+    }
+
+    .about p {
+      margin: 10px 0;
+      opacity: 0.9;
+      text-align: justify;
+    }
+
+    .about ul {
+      margin-top: 10px;
+      padding-left: 25px;
+    }
+
+    .about li {
+      margin-bottom: 8px;
+    }
+
+    /* Footer Section */
+    footer {
+      margin-top: 40px;
+      padding: 20px;
+      text-align: center;
+      font-size: 16px;
+      opacity: 0.8;
+    }
+
+    footer span {
+      color: #ffff66;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
+
+  <!-- 🌟 TOP NAVIGATION -->
   <div class="navbar">
     <a href="/index.html">🏠 Home</a>
     <a href="Home/registration.html">📝 Registration</a>
@@ -94,14 +161,58 @@
     <a href="Home/home login.html">🏦 Bank Dashboard</a>
   </div>
 
+  <!-- 💫 WELCOME SECTION -->
   <div class="hero floating">
     <h1>Welcome to <span style="color: #fff700;">SK Bank</span></h1>
     <p>Secure • Fast • Smart Banking System</p>
   </div>
 
+  <!-- 🧾 ABOUT SECTION -->
+  <div class="about">
+    <h2>About SK Bank</h2>
+    <p>
+      <strong>SK Bank</strong> is a modern digital banking platform designed for learning and educational purposes.
+      It demonstrates how online banking works, from account registration to transactions, all using
+      <b>HTML, CSS, and JavaScript</b> — stored safely in your browser’s local storage.
+    </p>
+
+    <p>
+      The purpose of SK Bank is to simulate real banking features with creative animation effects
+      and user-friendly design for students and developers who want to understand
+      web-based financial systems.
+    </p>
+
+    <h3>💡 Key Features:</h3>
+    <ul>
+      <li>🔹 Account Registration with auto-generated details</li>
+      <li>🔹 Login and secure local data management</li>
+      <li>🔹 Deposit, Withdrawal, and Transaction Ledger System</li>
+      <li>🔹 Animated Dashboard and Background Effects</li>
+      <li>🔹 Works fully offline (LocalStorage based)</li>
+    </ul>
+
+    <h3>🧭 Navigation:</h3>
+    <ul>
+      <li><b>🏠 Home:</b> The welcome page of SK Bank with background animation.</li>
+      <li><b>📝 Registration:</b> Create a new account and generate your customer ID.</li>
+      <li><b>🔐 Login:</b> Access your account securely using stored credentials.</li>
+      <li><b>🏦 Bank Dashboard:</b> View your balance, deposit, and transactions.</li>
+    </ul>
+
+    <p>
+      SK Bank is a secure educational demo, not a real financial institution.
+      All money values and transactions are for learning and testing only.
+    </p>
+  </div>
+
+  <!-- 🌍 FOOTER -->
+  <footer>
+    © 2025 <span>SK Bank</span> • Created for Educational Banking Simulation
+  </footer>
+
   <script>
-    // Simple entry animation on load
-    window.addEventListener('load', ()=>{
+    // 🧠 Simple Fade-In on Load
+    window.addEventListener('load', () => {
       document.body.style.opacity = '1';
     });
   </script>
