@@ -6,10 +6,7 @@
   <title>SK Bank — Cash Account (Ledger)</title>
 
   <style>
-    :root {
-      --accent: #0066cc;
-      --bg: #f3f6fb;
-    }
+    :root { --accent: #0066cc; --bg: #f3f6fb; }
 
     body {
       font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
@@ -26,30 +23,23 @@
       background: #fff;
       border-radius: 12px;
       padding: 22px;
-      width: 850px;
+      width: 900px;
       box-shadow: 0 8px 25px rgba(13, 38, 76, 0.08);
     }
 
-    h2 {
-      text-align: center;
-      margin: 0 0 16px;
-    }
+    h2 { text-align: center; margin: 0 0 16px; }
 
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
     }
-
     th, td {
       border: 1px solid #e5e7eb;
       padding: 8px;
       text-align: center;
     }
-
-    th {
-      background: #eef6ff;
-    }
+    th { background: #eef6ff; }
 
     .actions {
       display: flex;
@@ -75,9 +65,7 @@
       transform: scale(1.05);
     }
 
-    .logout {
-      background: #e11d48;
-    }
+    .logout { background: #e11d48; }
 
     .deposit-box {
       display: flex;
@@ -94,17 +82,8 @@
       width: 140px;
     }
 
-    .success {
-      color: green;
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    .error {
-      color: red;
-      text-align: center;
-      margin-top: 10px;
-    }
+    .success { color: green; text-align: center; margin-top: 10px; }
+    .error { color: red; text-align: center; margin-top: 10px; }
 
     .totals {
       text-align: right;
@@ -126,7 +105,7 @@
       <label>Deposit ₹:</label>
       <input type="number" id="depAmt" min="1" />
 
-      <button id="depositBtn">Deposit</button>
+      <button id="depositBtn">Add Pending</button>
     </div>
     <div id="msg"></div>
 
@@ -148,43 +127,48 @@
     <div id="totals" class="totals"></div>
 
     <div class="actions">
+      <button id="pdf">Download PDF</button>
+      <button id="printBtn">Print Ledger</button>
       <button id="back">KYC</button>
-      <button id="downloadPDF">📄 Download PDF</button>
       <button id="logout" class="logout">Logout</button>
     </div>
   </div>
 
-  <!-- jsPDF CDN -->
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
     const ACC_KEY = 'skbank_accounts_v1';
     const TX_KEY = 'skbank_tx_v1';
+    const PEND_KEY = 'skbank_pending_v1';
+
     const userAcc = localStorage.getItem('skbank_loggedIn');
+    if (!userAcc) { alert('Please login first'); location.href = 'login.html'; }
 
-    if (!userAcc) {
-      alert('Please login first');
-      location.href = 'login.html';
-    }
+    const load = key => JSON.parse(localStorage.getItem(key) || '[]');
+    const save = (key, data) => localStorage.setItem(key, JSON.stringify(data));
 
-    const loadAccounts = () => JSON.parse(localStorage.getItem(ACC_KEY) || '[]');
-    const saveAccounts = arr => localStorage.setItem(ACC_KEY, JSON.stringify(arr));
-    const loadTx = () => JSON.parse(localStorage.getItem(TX_KEY) || '[]');
-    const saveTx = arr => localStorage.setItem(TX_KEY, JSON.stringify(arr));
-
-    let accounts = loadAccounts();
+    let accounts = load(ACC_KEY);
+    let pending = load(PEND_KEY);
     let user = accounts.find(a => a.accNum === userAcc);
 
+
     const refreshInfo = () => {
+      const totalPending = pending
+        .filter(p => p.acc === userAcc)
+        .reduce((s, p) => s + p.amount, 0);
+
       document.getElementById('userInfo').innerHTML = `
         <b>${user.fname} ${user.lname}</b> — A/C: ${user.accNum}<br>
         Customer ID: ${user.custId}<br>
-        <b>Balance: ₹${user.balance.toFixed(2)}</b>
+        <b>Balance: ₹${user.balance.toFixed(2)}</b><br>
+        <span style="color:#d97706;">Pending: ₹${totalPending.toFixed(2)}</span>
       `;
     };
 
+
     const renderLedger = () => {
-      const txs = loadTx().filter(t => t.from === user.accNum || t.to === user.accNum);
+      const txs = load(TX_KEY).filter(t => t.from === userAcc || t.to === userAcc);
       const body = document.getElementById('ledgerBody');
       const totalsDiv = document.getElementById('totals');
 
@@ -195,13 +179,16 @@
       }
 
       let totalDebit = 0, totalCredit = 0;
+
       body.innerHTML = txs.map(t => {
         const date = new Date(t.date).toLocaleString();
-        const debit = t.from === user.accNum ? t.amount : 0;
-        const credit = t.to === user.accNum ? t.amount : 0;
-        if (debit > 0) totalDebit += debit;
-        if (credit > 0) totalCredit += credit;
-        return `<tr>
+        const debit = t.from === userAcc ? t.amount : 0;
+        const credit = t.to === userAcc ? t.amount : 0;
+
+        if (debit) totalDebit += debit;
+        if (credit) totalCredit += credit;
+
+        return `<tr style="color:${credit ? 'green' : debit ? 'red' : 'black'}">
           <td>${date}</td>
           <td>${t.particular}</td>
           <td>${t.type}</td>
@@ -211,66 +198,177 @@
       }).join('');
 
       totalsDiv.innerHTML = `
-        Total Debit: ₹${totalDebit.toFixed(2)} | 
-        Total Credit: ₹${totalCredit.toFixed(2)} | 
+        Total Debit: ₹${totalDebit.toFixed(2)} |
+        Total Credit: ₹${totalCredit.toFixed(2)} |
         Current Balance: ₹${user.balance.toFixed(2)}
       `;
     };
 
-    refreshInfo();
-    renderLedger();
 
-    // Deposit Feature with Name Input
-    document.getElementById('depositBtn').addEventListener('click', () => {
+    const renderPendingTable = () => {
+      let container = document.getElementById("pendingBox");
+
+      if (!container) {
+        container = document.createElement("div");
+        container.id = "pendingBox";
+        container.style.marginTop = "15px";
+        document.querySelector(".card").append(container);
+      }
+
+      const list = pending.filter(p => p.acc === userAcc);
+
+      if (list.length === 0) {
+        container.innerHTML = `<h3>No Pending Deposits</h3>`;
+        return;
+      }
+
+      container.innerHTML = `
+        <h3>Pending Deposits</h3>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Amount (₹)</th>
+            <th>Date</th>
+            <th>Approve</th>
+          </tr>
+          ${list.map((p, i) => `
+            <tr>
+              <td>${p.name}</td>
+              <td>₹${p.amount}</td>
+              <td>${new Date(p.date).toLocaleString()}</td>
+              <td><button style="background:#059669" onclick="approveOne(${i})">Approve</button></td>
+            </tr>
+          `).join("")}
+        </table>
+      `;
+    };
+
+
+    window.approveOne = (i) => {
+      const list = pending.filter(p => p.acc === userAcc);
+      const entry = list[i];
+
+      const txs = load(TX_KEY);
+      txs.push({
+        from: "PENDING",
+        to: userAcc,
+        amount: entry.amount,
+        type: "Approved Deposit",
+        particular: `Approved: ${entry.name}`,
+        date: new Date().toISOString()
+      });
+      save(TX_KEY, txs);
+
+      user.balance += entry.amount;
+
+      const idx = accounts.findIndex(a => a.accNum === userAcc);
+      accounts[idx] = user;
+      save(ACC_KEY, accounts);
+
+      pending = pending.filter((p, n) => !(p.acc === userAcc && n === i));
+      save(PEND_KEY, pending);
+
+      refreshInfo();
+      renderLedger();
+      renderPendingTable();
+    };
+
+
+    document.getElementById('depositBtn').onclick = () => {
       const amt = parseFloat(document.getElementById('depAmt').value);
       const name = document.getElementById('depName').value.trim();
       const msg = document.getElementById('msg');
 
-      if (!name) {
-        msg.innerHTML = '<div class="error">Enter depositor name!</div>';
-        return;
-      }
+      if (!name) { msg.innerHTML = '<div class="error">Enter name!</div>'; return; }
+      if (isNaN(amt) || amt <= 0) { msg.innerHTML = '<div class="error">Invalid amount!</div>'; return; }
 
-      if (isNaN(amt) || amt <= 0) {
-        msg.innerHTML = '<div class="error">Enter valid amount!</div>';
-        return;
-      }
-
-      const idx = accounts.findIndex(a => a.accNum === user.accNum);
-      if (idx !== -1) {
-        accounts[idx].balance += amt;
-        saveAccounts(accounts);
-      }
-      user.balance += amt;
-
-      const txs = loadTx();
-      txs.push({
-        from: 'CASH',
-        to: user.accNum,
+      pending.push({
+        acc: userAcc,
+        name,
         amount: amt,
-        type: 'Deposit',
-        particular: `Cash Deposit by ${name}`,
         date: new Date().toISOString()
       });
-      saveTx(txs);
+
+      save(PEND_KEY, pending);
+
+      msg.innerHTML = `<div class="success">₹${amt} Pending Added!</div>`;
 
       document.getElementById('depAmt').value = '';
       document.getElementById('depName').value = '';
 
-      msg.innerHTML = `<div class="success">₹${amt.toFixed(2)} deposited by ${name}!</div>`;
       refreshInfo();
-      renderLedger();
-      setTimeout(() => (msg.innerHTML = ''), 4000);
-    });
+      renderPendingTable();
 
-    // PDF Download — unchanged logic
+      setTimeout(() => msg.innerHTML = '', 3000);
+    };
 
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
+
+      doc.setFontSize(14);
+      doc.text("S.K BANK - Account Statement", 10, y); y += 8;
+      doc.setFontSize(10);
+
+      doc.text(`Name: ${user.fname} ${user.lname}`, 10, y); y += 5;
+      doc.text(`Account No: ${user.accNum}`, 10, y); y += 5;
+      doc.text(`Balance: ₹${user.balance.toFixed(2)}`, 10, y); y += 10;
+
+      doc.text("Date", 10, y);
+      doc.text("Particulars", 50, y);
+      doc.text("Type", 110, y);
+      doc.text("Debit", 140, y);
+      doc.text("Credit", 170, y);
+
+      y += 6;
+      doc.line(10, y, 200, y); y += 4;
+
+      const txs = load(TX_KEY).filter(t => t.from === userAcc || t.to === userAcc);
+
+      txs.forEach(t => {
+        let debit = t.from === userAcc ? t.amount : "";
+        let credit = t.to === userAcc ? t.amount : "";
+
+        doc.text(new Date(t.date).toLocaleDateString(), 10, y);
+        doc.text(t.particular.slice(0, 20), 50, y);
+        doc.text(t.type.slice(0, 10), 110, y);
+        doc.text(debit ? "₹" + debit : "", 140, y);
+        doc.text(credit ? "₹" + credit : "", 170, y);
+
+        y += 6;
+        if (y > 270) {
+          doc.addPage();
+          y = 10;
+        }
+      });
+
+      y += 10;
+      doc.setFontSize(12);
+      doc.text("Signature:", 10, y);
+      doc.text("K. Sushanta", 35, y);
+
+      doc.save("SKBank_Ledger.pdf");
+    }
+
+    // PRINT BUTTON
+    document.getElementById('printBtn').onclick = () => {
+      window.print();
+    };
+
+    refreshInfo();
+    renderLedger();
+    renderPendingTable();
+
+    document.getElementById('pdf').onclick = downloadPDF;
     document.getElementById('logout').onclick = () => {
       localStorage.removeItem('skbank_loggedIn');
       location.href = 'home login.html';
     };
-
-    document.getElementById('back').onclick = () => location.href = 'Editing.html';
+    document.getElementById('back').onclick = () => {
+      location.href = 'Editing.html';
+    };
   </script>
 </body>
 </html>
