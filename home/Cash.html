@@ -84,14 +84,13 @@
       gap: 8px;
       align-items: center;
       margin-top: 10px;
-      flex-wrap: wrap;
     }
 
     .deposit-box input {
       padding: 8px;
       border-radius: 6px;
       border: 1px solid #d1d5db;
-      width: 140px;
+      width: 120px;
     }
 
     .success {
@@ -120,12 +119,8 @@
     <div id="userInfo"></div>
 
     <div class="deposit-box">
-      <label>Name:</label>
-      <input type="text" id="depName" placeholder="Enter Name" />
-
-      <label>Deposit ₹:</label>
+      <label>Deposit Amount (₹):</label>
       <input type="number" id="depAmt" min="1" />
-
       <button id="depositBtn">Deposit</button>
     </div>
     <div id="msg"></div>
@@ -154,7 +149,7 @@
     </div>
   </div>
 
-  <!-- jsPDF CDN -->
+  <!-- ✅ jsPDF CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
@@ -220,22 +215,17 @@
     refreshInfo();
     renderLedger();
 
-    // Deposit Feature with Name Input
+    // ✅ Deposit Feature (Fixed)
     document.getElementById('depositBtn').addEventListener('click', () => {
       const amt = parseFloat(document.getElementById('depAmt').value);
-      const name = document.getElementById('depName').value.trim();
       const msg = document.getElementById('msg');
 
-      if (!name) {
-        msg.innerHTML = '<div class="error">Enter depositor name!</div>';
-        return;
-      }
-
       if (isNaN(amt) || amt <= 0) {
-        msg.innerHTML = '<div class="error">Enter valid amount!</div>';
+        msg.innerHTML = '<div class="error">Enter a valid amount!</div>';
         return;
       }
 
+      // 🔹 Update user's balance inside accounts array
       const idx = accounts.findIndex(a => a.accNum === user.accNum);
       if (idx !== -1) {
         accounts[idx].balance += amt;
@@ -243,28 +233,85 @@
       }
       user.balance += amt;
 
+      // 🔹 Record transaction
       const txs = loadTx();
       txs.push({
         from: 'CASH',
         to: user.accNum,
         amount: amt,
         type: 'Deposit',
-        particular: `Cash Deposit by ${name}`,
+        particular: 'Cash Deposit',
         date: new Date().toISOString()
       });
       saveTx(txs);
 
       document.getElementById('depAmt').value = '';
-      document.getElementById('depName').value = '';
-
-      msg.innerHTML = `<div class="success">₹${amt.toFixed(2)} deposited by ${name}!</div>`;
+      msg.innerHTML = `<div class="success">✅ ₹${amt.toFixed(2)} deposited successfully!</div>`;
       refreshInfo();
       renderLedger();
       setTimeout(() => (msg.innerHTML = ''), 4000);
     });
 
-    // PDF Download — unchanged logic
+    // ✅ PDF Download
+    document.getElementById('downloadPDF').addEventListener('click', async () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+      const txs = loadTx().filter(t => t.from === user.accNum || t.to === user.accNum);
 
+      let y = 40;
+      doc.setFontSize(16);
+      doc.text("SK BANK — Cash Account Statement", 180, y);
+      y += 25;
+      doc.setFontSize(11);
+      doc.text(`Name: ${user.fname} ${user.lname}`, 40, y);
+      doc.text(`Account No: ${user.accNum}`, 300, y);
+      y += 15;
+      doc.text(`Customer ID: ${user.custId}`, 40, y);
+      y += 20;
+
+      // Table Header
+      doc.setFont("helvetica", "bold");
+      doc.text("Date & Time", 40, y);
+      doc.text("Particulars", 150, y);
+      doc.text("Type", 300, y);
+      doc.text("Debit", 400, y);
+      doc.text("Credit", 470, y);
+      y += 10;
+      doc.setLineWidth(0.5);
+      doc.line(40, y, 550, y);
+      y += 15;
+
+      doc.setFont("helvetica", "normal");
+      let totalDebit = 0, totalCredit = 0;
+      txs.forEach(t => {
+        const date = new Date(t.date).toLocaleString();
+        const debit = t.from === user.accNum ? t.amount : 0;
+        const credit = t.to === user.accNum ? t.amount : 0;
+        if (debit > 0) totalDebit += debit;
+        if (credit > 0) totalCredit += credit;
+
+        doc.text(date, 40, y, { maxWidth: 100 });
+        doc.text(t.particular || "", 150, y, { maxWidth: 130 });
+        doc.text(t.type || "", 300, y);
+        if (debit > 0) doc.text("₹" + debit.toFixed(2), 400, y);
+        if (credit > 0) doc.text("₹" + credit.toFixed(2), 470, y);
+        y += 15;
+        if (y > 750) { doc.addPage(); y = 50; }
+      });
+
+      y += 20;
+      doc.setFont("helvetica", "bold");
+      doc.text(`Total Debit: ₹${totalDebit.toFixed(2)}`, 40, y);
+      doc.text(`Total Credit: ₹${totalCredit.toFixed(2)}`, 220, y);
+      doc.text(`Balance: ₹${user.balance.toFixed(2)}`, 400, y);
+      y += 40;
+      doc.setFontSize(9);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 40, y);
+
+      doc.save(`SKBank_Statement_${user.accNum}.pdf`);
+    });
+
+    // ✅ Logout and Back
     document.getElementById('logout').onclick = () => {
       localStorage.removeItem('skbank_loggedIn');
       location.href = 'home login.html';
