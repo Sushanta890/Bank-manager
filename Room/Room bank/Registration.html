@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SK Bank - Zero Balance Account Opening</title>
+
+<style>
+body{font-family:Arial;background:#e9f2ff;padding:20px;}
+#formBox{
+    width:420px;margin:auto;background:#fff;padding:20px;
+    border-radius:10px;box-shadow:0 0 10px #aaa;
+}
+input{width:100%;padding:8px;margin:10px 0;border-radius:6px;border:1px solid #aaa;}
+button{
+    width:100%;padding:10px;background:#0072ff;color:#fff;
+    border:none;border-radius:6px;font-size:16px;cursor:pointer;
+}
+#photo{
+    width:120px;height:120px;margin:auto;display:block;
+    border:1px solid #aaa;object-fit:cover;
+}
+</style>
+</head>
+
+<body>
+
+<h2 align="center">SK BANK — Zero Balance Account Opening</h2>
+
+<div id="formBox">
+
+<input type="text" id="aadharInput" placeholder="Enter Aadhaar Number">
+<button onclick="fetchAadhar()">Fetch Aadhaar Details</button>
+
+<hr>
+
+<img id="photo">
+
+<p><b>Name:</b> <span id="name"></span></p>
+<p><b>Mobile:</b> <span id="mobile"></span></p>
+<p><b>Gender:</b> <span id="gender"></span></p>
+<p><b>Date of Birth:</b> <span id="dob"></span></p>
+<p><b>Address:</b> <span id="address"></span></p>
+
+<hr>
+
+<button onclick="openAccount()">Open Account</button>
+
+</div>
+
+<script>
+
+// Generate random numbers
+function randomAccount() {
+    return Math.floor(100000000000000 + Math.random() * 900000000000000);
+}
+function randomCustomerID() {
+    return Math.floor(1000000000 + Math.random() * 9000000000);
+}
+
+let userData = null;
+
+// Load Aadhaar Details
+function fetchAadhar() {
+    let aad = document.getElementById("aadharInput").value.trim();
+    userData = null;
+
+    for(let i=0; i<localStorage.length; i++){
+        let key = localStorage.key(i);
+        let data = JSON.parse(localStorage.getItem(key));
+
+        if(data.aadhar == aad){
+            userData = data;
+            break;
+        }
+    }
+
+    if(!userData){
+        alert("No Aadhaar record found!");
+        return;
+    }
+
+    document.getElementById("photo").src = userData.photo;
+    document.getElementById("name").innerText = userData.fname + " " + userData.lname;
+    document.getElementById("mobile").innerText = userData.mobile;
+    document.getElementById("gender").innerText = userData.gender;
+    document.getElementById("dob").innerText = userData.dob;
+    document.getElementById("address").innerText =
+        userData.village + ", " + userData.district + ", " +
+        userData.state + ", " + userData.country + " - " + userData.pin;
+}
+
+// Open Bank Account & Save in LocalStorage
+function openAccount() {
+    if(!userData){
+        alert("Fetch Aadhaar details first!");
+        return;
+    }
+
+    let accNo = randomAccount();
+    let custID = randomCustomerID();
+
+    let bankData = {
+        name : userData.fname + " " + userData.lname,
+        mobile : userData.mobile,
+        aadhar : userData.aadhar,
+        account : accNo,
+        customerID : custID,
+        address : userData.village + " " + userData.district,
+        photo : userData.photo
+    };
+
+    localStorage.setItem("BANK_"+userData.mobile, JSON.stringify(bankData));
+
+    alert("Account Created Successfully!\nAccount No: " + accNo + "\nCustomer ID: " + custID);
+}
+</script>
+
+</body>
+</html>

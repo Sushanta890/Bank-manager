@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Aadhaar Registration</title>
+<style>
+body{font-family:Arial;background:#eef3ff;padding:20px;}
+form{width:380px;margin:auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 0 10px #bbb;}
+input,select{width:100%;padding:8px;margin-top:5px;margin-bottom:10px;border-radius:5px;border:1px solid #aaa;}
+button{padding:10px;width:100%;border:none;background:#0b63d1;color:#fff;font-size:16px;border-radius:5px;cursor:pointer;}
+#photoPreview{width:120px;height:120px;background:#ddd;margin-bottom:10px;object-fit:cover;border:1px solid #aaa;}
+</style>
+</head>
+<body>
+
+<h2 align="center">Aadhaar Registration Form</h2>
+
+<form id="regForm">
+
+<input type="text" id="fname" placeholder="First Name" required>
+<input type="text" id="lname" placeholder="Last Name" required>
+<input type="tel" id="mobile" placeholder="Mobile Number" required>
+
+<select id="gender" required>
+<option value="">Select Gender</option>
+<option>Male</option>
+<option>Female</option>
+</select>
+
+<label>Date of Birth</label>
+<input type="date" id="dob" required>
+
+<label>Upload Photo</label>
+<input type="file" id="photo" accept="image/*">
+<img id="photoPreview">
+
+<select id="country" required onchange="loadState()">
+<option value="">Select Country</option>
+<option>India</option>
+<option>Pakistan</option>
+<option>Indonesia</option>
+<option>China</option>
+<option>Dubai</option>
+</select>
+
+<select id="state" required onchange="loadCity()">
+<option value="">Select State</option>
+</select>
+
+<select id="district" required>
+<option value="">Select District</option>
+</select>
+
+<input type="text" id="village" placeholder="Village" required>
+<input type="number" id="pin" placeholder="4 Digit PIN" maxlength="4" required>
+
+<button type="submit">Register & Generate Aadhaar</button>
+</form>
+
+<script>
+// Preview & convert image to Base64
+let base64Photo = "";
+photo.onchange = function(){
+ let file = this.files[0];
+ let reader = new FileReader();
+ reader.onload = function(){
+    base64Photo = reader.result;
+    photoPreview.src = base64Photo; // image store permanent
+ }
+ reader.readAsDataURL(file);
+}
+
+// State - City Data
+const cityData={
+"India":{"Odisha":["Rayagada","Koraput","Malkangiri"],
+"AP":["Visakhapatnam","Vijayawada"]},
+"Pakistan":{}, "Indonesia":{}, "China":{}, "Dubai":{}
+};
+
+function loadState(){
+state.innerHTML = '<option>Select State</option>';
+Object.keys(cityData[country.value]||{}).forEach(s=>{
+state.innerHTML+=`<option>${s}</option>`;
+})
+}
+
+function loadCity(){
+district.innerHTML="";
+(cityData[country.value][state.value]||[]).forEach(c=>{
+district.innerHTML+=`<option>${c}</option>`;
+})
+}
+
+// Generate 12-digit Aadhaar number
+function randomAadhar(){
+return Math.floor(100000000000 + Math.random()*900000000000);
+}
+
+// Save Data in LocalStorage
+regForm.onsubmit = e =>{
+e.preventDefault();
+
+if(base64Photo===""){ alert("Upload Photo!"); return; }
+
+let data={
+fname:fname.value,lname:lname.value,mobile:mobile.value,
+gender:gender.value,dob:dob.value,village:village.value,
+country:country.value,state:state.value,district:district.value,
+pin:pin.value,aadhar:randomAadhar(),photo:base64Photo
+};
+
+localStorage.setItem(mobile.value,JSON.stringify(data));
+
+alert("Registration Successful!");
+location.href="aadhar.html?mobile="+mobile.value; // open card page
+}
+</script>
+</body>
+</html>

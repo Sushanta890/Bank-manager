@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SK BANK — Login</title>
+
+<style>
+body { font-family: Arial; background: #e9f2ff; padding: 20px; }
+#loginBox{
+    width: 380px; margin: auto; background: #fff; padding: 20px;
+    border-radius: 10px; box-shadow: 0 0 10px #aaa;
+}
+input, select{
+    width: 100%; padding: 10px; margin: 10px 0;
+    border: 1px solid #aaa; border-radius: 6px;
+}
+button{
+    width: 100%; padding: 10px; background: #0072ff; color: white;
+    border: none; border-radius: 6px; cursor: pointer; font-size: 16px;
+}
+#dashboard{
+    display: none;
+    width: 900px; margin: auto; background: #fff; padding: 20px;
+    border-radius: 10px; box-shadow: 0 0 10px #aaa;
+}
+.leftBox, .rightBox {
+    width: 48%; vertical-align: top; display: inline-block;
+}
+#photo{
+    width: 120px; height: 120px; border-radius: 8px;
+    border: 1px solid #aaa; object-fit: cover;
+}
+.history-box{
+    background:#f5f7ff;padding:10px;border-radius:5px;
+    border:1px solid #ccc;max-height:230px;overflow:auto;
+}
+.item{
+    background:#fff;padding:8px;margin:5px 0;border-left:4px solid #0072ff;
+    border-radius:4px;font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<h2 align="center">SK BANK — Customer Login</h2>
+
+<div id="loginBox">
+    <input type="text" id="acc" placeholder="Enter Bank Account Number">
+    <input type="text" id="mob" placeholder="Enter Mobile Number">
+    <button onclick="login()">Login</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+
+    <div class="leftBox">
+        <h3>Customer Details</h3>
+        <img id="photo">
+        <p><b>Name:</b> <span id="d_name"></span></p>
+        <p><b>Mobile:</b> <span id="d_mobile"></span></p>
+        <p><b>Account No:</b> <span id="d_account"></span></p>
+        <p><b>Customer ID:</b> <span id="d_custID"></span></p>
+    </div>
+
+    <div class="rightBox">
+        <h3>Account Balance</h3>
+        <h2>₹<span id="balance"></span></h2>
+
+        <hr>
+        <h3>Payments</h3>
+
+        <select id="billType">
+            <option value="">Select Payment Type</option>
+            <option>Room Rent</option>
+            <option>Gas Bill</option>
+            <option>Electrical Bill</option>
+            <option>Purchase Items</option>
+        </select>
+
+        <!-- PURCHASE ITEM NAME -->
+        <input type="text" id="itemName" placeholder="Enter Purchase Item Name" style="display:none;">
+
+        <input type="number" id="billAmt" placeholder="Enter Amount">
+        <button onclick="payBill()">Submit</button>
+
+        <hr>
+        <h3>Transaction History</h3>
+        <div class="history-box" id="history"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+let user = null;
+
+// SHOW INPUT BOX ONLY IF BILL TYPE = PURCHASE ITEMS
+document.getElementById("billType").addEventListener("change", function(){
+    if(this.value === "Purchase Items"){
+        document.getElementById("itemName").style.display = "block";
+    } else {
+        document.getElementById("itemName").style.display = "none";
+    }
+});
+
+// LOGIN FUNCTION
+function login() {
+    let acc = document.getElementById("acc").value.trim();
+    let mob = document.getElementById("mob").value.trim();
+    user = null;
+
+    for(let i=0; i<localStorage.length; i++){
+        let key = localStorage.key(i);
+        if(!key.startsWith("BANK_")) continue;
+
+        let data = JSON.parse(localStorage.getItem(key));
+
+        if(data.account == acc && data.mobile == mob){
+            user = data;
+            break;
+        }
+    }
+
+    if(!user){
+        alert("Invalid account or mobile number!");
+        return;
+    }
+
+    if(user.balance === undefined) user.balance = 0;
+    if(!user.history) user.history = [];
+
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+
+    document.getElementById("photo").src = user.photo;
+    document.getElementById("d_name").innerText = user.name;
+    document.getElementById("d_mobile").innerText = user.mobile;
+    document.getElementById("d_account").innerText = user.account;
+    document.getElementById("d_custID").innerText = user.customerID;
+    document.getElementById("balance").innerText = user.balance;
+
+    showHistory();
+}
+
+// PAYMENT FUNCTION
+function payBill() {
+    let type = document.getElementById("billType").value;
+    let amt = Number(document.getElementById("billAmt").value);
+    let itemName = document.getElementById("itemName").value.trim();
+
+    if(type == ""){
+        alert("Select a payment type!");
+        return;
+    }
+
+    if(amt <= 0){
+        alert("Enter valid amount!");
+        return;
+    }
+
+    if(type === "Purchase Items" && itemName === ""){
+        alert("Enter Item Name!");
+        return;
+    }
+
+    if(user.balance < amt){
+        alert("Insufficient balance!");
+        return;
+    }
+
+    user.balance -= amt;
+
+    let now = new Date();
+    let time = now.toLocaleDateString() + " " + now.toLocaleTimeString();
+
+    let entry = {
+        type: (type === "Purchase Items") ? itemName : type,
+        amount: amt,
+        datetime: time
+    };
+
+    user.history.unshift(entry);
+
+    localStorage.setItem("BANK_"+user.mobile, JSON.stringify(user));
+
+    alert("Payment Successful!");
+    document.getElementById("balance").innerText = user.balance;
+    showHistory();
+}
+
+// DISPLAY HISTORY
+function showHistory(){
+    let h = document.getElementById("history");
+    h.innerHTML = "";
+
+    if(user.history.length == 0){
+        h.innerHTML = "<p>No transactions yet.</p>";
+        return;
+    }
+
+    user.history.forEach(t => {
+        h.innerHTML += `
+            <div class="item">
+                <b>${t.type}</b><br>
+                Amount: ₹${t.amount}<br>
+                <small>${t.datetime}</small>
+            </div>
+        `;
+    });
+}
+
+</script>
+
+</body>
+</html>

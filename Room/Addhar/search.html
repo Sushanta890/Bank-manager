@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Aadhaar Card</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#e9f0ff;
+    text-align:center;
+    padding:20px;
+}
+
+input{
+    padding:10px;
+    width:220px;
+    margin:5px;
+    border-radius:5px;
+    border:1px solid #aaa;
+}
+button{
+    padding:10px 20px;
+    background:#0b63d1;
+    color:#fff;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    margin-top:5px;
+}
+
+.card{
+    width:500px;
+    margin:30px auto;
+    background:#fff;
+    border-radius:14px;
+    border:1px solid #ccc;
+    overflow:hidden;
+    box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+.card-header{
+    padding:10px;
+    border-bottom:1px solid #e5e5e5;
+}
+.flag{font-weight:bold;font-size:16px;}
+.flag span:nth-child(1){color:#ff9933;}
+.flag span:nth-child(2){color:#138808;}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    padding:15px;
+}
+.photo{
+    width:120px;height:140px;
+    border:1px solid #aaa;
+    background:#ccd6ff;
+    object-fit:cover;
+}
+.details{text-align:left;font-size:14px;line-height:22px;}
+.aadhar-num{font-size:22px;text-align:center;letter-spacing:3px;font-weight:bold;margin-top:5px;}
+.qr{width:120px;height:120px;margin-top:10px;}
+.footer{padding:10px;font-size:16px;}
+.footer span{color:red;font-weight:bold;}
+
+</style>
+</head>
+<body>
+
+<h2>Aadhaar Card Viewer</h2>
+
+<input type="tel" id="searchMob" placeholder="Enter Mobile Number">
+<input type="password" id="verPin" placeholder="Enter 4 Digit PIN"><br>
+<button onclick="showCard()">Show Aadhaar</button>
+
+<div id="result"></div>
+
+<script>
+function showCard(){
+    let data = JSON.parse(localStorage.getItem(searchMob.value));
+
+    if(!data){ result.innerHTML="<h3>No Record Found</h3>"; return; }
+    if(data.pin != verPin.value){ result.innerHTML="<h3>Incorrect PIN</h3>"; return; }
+
+    result.innerHTML = `
+    <div id="cardArea" class="card">
+        <div class="card-header">
+            <div class="flag">
+                <span>भारत सरकार</span> | <span>GOVERNMENT OF INDIA</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <img class="photo" src="${data.photo || 'https://via.placeholder.com/120x140'}">
+            <div class="details">
+                <b>Name:</b> ${data.fname} ${data.lname}<br>
+                <b>DOB:</b> ${data.dob}<br>
+                <b>Gender:</b> ${data.gender}<br><br>
+                <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${data.aadhar}">
+            </div>
+        </div>
+
+        <div class="aadhar-num">${data.aadhar.toString().replace(/(.{4})/g,'$1 ')}</div>
+
+        <div class="footer">
+            <span>आधार</span> - भारतीय विशिष्ट पहचान प्राधिकरण
+        </div>
+    </div>`;
+}
+</script>
+
+</body>
+</html>

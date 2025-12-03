@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SK Bank - Deposit Money</title>
+
+<style>
+body{font-family:Arial;background:#eef4ff;padding:20px;}
+#box{
+    width:450px;margin:auto;background:#fff;padding:20px;
+    border-radius:10px;box-shadow:0 0 10px #999;
+}
+input{
+    width:100%;padding:10px;margin:10px 0;
+    border:1px solid #aaa;border-radius:5px;
+}
+button{
+    width:100%;padding:10px;background:#007bff;color:#fff;
+    border:none;border-radius:5px;font-size:16px;cursor:pointer;
+}
+p{font-size:17px;}
+#photo{
+    width:120px;height:120px;margin:auto;
+    display:block;border:1px solid #aaa;object-fit:cover;
+}
+.history-box{
+    background:#f7f9ff;padding:10px;border-radius:5px;
+    border:1px solid #ccc;max-height:200px;overflow:auto;
+}
+.history-item{
+    background:#fff;padding:8px;margin:6px 0;border-left:4px solid #007bff;
+    border-radius:4px;font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<h2 align="center">SK BANK — Deposit Money</h2>
+
+<div id="box">
+
+<input type="text" id="accInput" placeholder="Enter Bank Account Number">
+<button onclick="fetchAccount()">Find Account</button>
+
+<hr>
+
+<img id="photo">
+
+<p><b>Name:</b> <span id="name"></span></p>
+<p><b>Mobile:</b> <span id="mobile"></span></p>
+<p><b>Account Number:</b> <span id="account"></span></p>
+<p><b>Current Balance:</b> ₹<span id="balance"></span></p>
+
+<hr>
+
+<input type="text" id="depName" placeholder="Enter Depositor Name">
+<input type="number" id="amount" placeholder="Enter Deposit Amount">
+<button onclick="depositMoney()">Deposit</button>
+
+<hr>
+
+<h3>Transaction History</h3>
+<div id="history" class="history-box"></div>
+
+</div>
+
+<script>
+
+let bankUser = null;
+
+// Fetch Account Details by Account Number
+function fetchAccount() {
+    let acc = document.getElementById("accInput").value.trim();
+    bankUser = null;
+
+    for(let i=0; i<localStorage.length; i++){
+        let key = localStorage.key(i);
+        if(!key.startsWith("BANK_")) continue;
+
+        let data = JSON.parse(localStorage.getItem(key));
+
+        if(data.account == acc){
+            bankUser = data;
+            break;
+        }
+    }
+
+    if(!bankUser){
+        alert("No SK Bank account found!");
+        return;
+    }
+
+    if(bankUser.balance === undefined){
+        bankUser.balance = 0;
+    }
+
+    if(!bankUser.history){
+        bankUser.history = [];
+    }
+
+    document.getElementById("photo").src = bankUser.photo;
+    document.getElementById("name").innerText = bankUser.name;
+    document.getElementById("mobile").innerText = bankUser.mobile;
+    document.getElementById("account").innerText = bankUser.account;
+    document.getElementById("balance").innerText = bankUser.balance;
+
+    showHistory();
+}
+
+// Deposit Money + Store History
+function depositMoney() {
+    if(!bankUser){
+        alert("Find account first!");
+        return;
+    }
+
+    let depositor = document.getElementById("depName").value.trim();
+    let amt = Number(document.getElementById("amount").value);
+
+    if(depositor.length < 1){
+        alert("Enter depositor name!");
+        return;
+    }
+
+    if(amt <= 0){
+        alert("Enter a valid deposit amount!");
+        return;
+    }
+
+    bankUser.balance += amt;
+
+    let now = new Date();
+    let dateTime = now.toLocaleDateString() + " " + now.toLocaleTimeString();
+
+    let trans = {
+        type: "Deposit",
+        depositor: depositor,
+        amount: amt,
+        datetime: dateTime
+    };
+
+    bankUser.history.unshift(trans);
+
+    localStorage.setItem("BANK_"+bankUser.mobile, JSON.stringify(bankUser));
+
+    alert("Deposit Successful! New Balance: ₹" + bankUser.balance);
+
+    document.getElementById("balance").innerText = bankUser.balance;
+
+    showHistory();
+}
+
+// Display Transaction History
+function showHistory(){
+    let box = document.getElementById("history");
+    box.innerHTML = "";
+
+    if(!bankUser.history || bankUser.history.length == 0){
+        box.innerHTML = "<p>No transactions yet.</p>";
+        return;
+    }
+
+    bankUser.history.forEach(item => {
+        box.innerHTML += `
+            <div class="history-item">
+                <b>${item.type}</b> - ₹${item.amount}<br>
+                <b>By:</b> ${item.depositor}<br>
+                <small>${item.datetime}</small>
+            </div>
+        `;
+    });
+}
+
+</script>
+
+</body>
+</html>

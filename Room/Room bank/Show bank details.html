@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SK Bank - Account Details</title>
+
+<style>
+body{font-family:Arial;background:#f0f5ff;padding:20px;}
+#box{
+    width:420px;background:#fff;margin:auto;padding:20px;
+    border-radius:10px;box-shadow:0 0 10px #999;
+}
+input{width:100%;padding:10px;border:1px solid #aaa;border-radius:5px;margin-bottom:10px;}
+button{
+    width:100%;padding:10px;background:#007bff;color:#fff;
+    border:none;border-radius:5px;font-size:16px;cursor:pointer;
+}
+#photo{
+    width:120px;height:120px;border:1px solid #aaa;
+    object-fit:cover;display:block;margin:auto;
+}
+p{font-size:17px;}
+</style>
+</head>
+
+<body>
+
+<h2 align="center">SK BANK — Account Viewer</h2>
+
+<div id="box">
+
+<input type="text" id="searchKey" placeholder="Enter Mobile OR Account Number">
+<button onclick="searchAccount()">Search Account</button>
+
+<hr>
+
+<img id="photo">
+<p><b>Name:</b> <span id="name"></span></p>
+<p><b>Mobile:</b> <span id="mobile"></span></p>
+<p><b>Aadhaar:</b> <span id="aadhar"></span></p>
+<p><b>Customer ID:</b> <span id="customerID"></span></p>
+<p><b>Account Number:</b> <span id="account"></span></p>
+<p><b>Balance:</b> ₹<span id="balance"></span></p>
+
+</div>
+
+<script>
+
+function searchAccount() {
+    let search = document.getElementById("searchKey").value.trim();
+    let found = null;
+
+    // Search all SK BANK accounts in localStorage
+    for(let i=0; i<localStorage.length; i++){
+        let key = localStorage.key(i);
+
+        if(!key.startsWith("BANK_")) continue;
+
+        let data = JSON.parse(localStorage.getItem(key));
+
+        // Match mobile or account number
+        if(data.mobile == search || data.account == search){
+            found = data;
+            break;
+        }
+    }
+
+    if(!found){
+        alert("No matching SK Bank account found!");
+        return;
+    }
+
+    // Display Data
+    document.getElementById("photo").src = found.photo;
+    document.getElementById("name").innerText = found.name;
+    document.getElementById("mobile").innerText = found.mobile;
+    document.getElementById("aadhar").innerText = found.aadhar;
+    document.getElementById("customerID").innerText = found.customerID;
+    document.getElementById("account").innerText = found.account;
+
+    // If balance is not saved, assign ₹0
+    document.getElementById("balance").innerText = found.balance ?? 0;
+}
+
+</script>
+
+</body>
+</html>
