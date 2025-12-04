@@ -1,222 +1,175 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏦 SK Bank — Home</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Home | Aadhaar & Bank System</title>
 
   <style>
-    /* 🌈 BACKGROUND ANIMATION SECTION
-       ---------------------------------
-       This creates a smooth animated background using gradient colors.
-       The background color shifts between multiple colors infinitely.
-    */
     body {
       margin: 0;
-      height: 100vh;
-      font-family: 'Poppins', sans-serif;
+      font-family: Arial;
+      background: linear-gradient(120deg, #4facfe, #00f2fe);
+      background-size: 300% 300%;
+      animation: gradientMove 10s infinite alternate;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: left; }
+      100% { background-position: right; }
+    }
+
+    /* Top Navigation */
+    nav {
+      width: 100%;
+      background: rgba(10, 102, 194, 0.9);
+      color: #fff;
+      padding: 12px 20px;
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(4px);
+    }
+
+    nav h2 {
+      margin: 0;
+      font-size: 20px;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    nav .nav-btns a {
+      margin-left: 10px;
+      padding: 8px 14px;
+      background: #ffffff22;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      border: 1px solid #fff;
+      transition: 0.3s;
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    nav .nav-btns a:hover {
+      background: #fff;
+      color: #0a66c2;
+    }
+
+    /* Main Layout */
+    .container {
+      display: flex;
+      height: calc(100vh - 60px);
+      animation: fadeIn 1.5s ease-out;
+    }
+
+    /* Fade + Slide Animation */
+    @keyframes slideLeft {
+      0% { opacity: 0; transform: translateX(-50px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideRight {
+      0% { opacity: 0; transform: translateX(50px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    .left {
+      flex: 1;
+      display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      overflow-y: auto;
-      background: linear-gradient(270deg, #0066ff, #00cc99, #ff6600, #cc33ff);
-      background-size: 800% 800%;
-      animation: gradientShift 12s ease infinite;
-      scroll-behavior: smooth;
+      animation: slideLeft 1s ease-out;
     }
 
-    /* Defines the color movement direction and timing */
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    /* 🔹 TOP NAVIGATION BAR SECTION */
-    .navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(0, 0, 0, 0.25);
-      backdrop-filter: blur(10px);
+    .right {
+      flex: 1;
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 30px;
-      padding: 15px 0;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      z-index: 10;
+      animation: slideRight 1s ease-out;
     }
 
-    /* Navigation link design */
-    .navbar a {
-      color: white;
-      text-decoration: none;
-      font-weight: 600;
-      letter-spacing: 1px;
-      font-size: 18px;
-      padding: 10px 20px;
-      border-radius: 25px;
-      transition: all 0.3s ease;
-    }
-
-    .navbar a:hover {
-      background: rgba(255,255,255,0.2);
-      box-shadow: 0 0 12px white;
-      transform: scale(1.1);
-    }
-
-    /* 🏦 MAIN HERO SECTION */
-    .hero {
+    .btn-box {
+      width: 260px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
       text-align: center;
-      margin-top: 120px;
-      animation: fadeIn 1.5s ease-in;
-    }
-
-    .hero h1 {
-      font-size: 52px;
-      margin-bottom: 10px;
-      text-shadow: 0 0 20px rgba(255,255,255,0.8);
-    }
-
-    .hero p {
-      font-size: 22px;
-      opacity: 0.95;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .floating {
-      animation: float 3s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    /* 🧾 ABOUT SECTION */
-    .about {
-      max-width: 850px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 15px;
-      padding: 30px 40px;
-      margin-top: 50px;
-      line-height: 1.7;
-      font-size: 18px;
       backdrop-filter: blur(8px);
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
-      animation: fadeIn 1.5s ease-in;
+      animation: fadeIn 1.5s ease-in-out;
     }
 
-    .about h2 {
-      text-align: center;
-      font-size: 28px;
-      margin-bottom: 10px;
-      text-shadow: 0 0 15px rgba(255,255,255,0.9);
+    .btn-box h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
     }
 
-    .about p {
+    .action-btn {
+      display: block;
+      width: 100%;
       margin: 10px 0;
-      opacity: 0.9;
-      text-align: justify;
-    }
-
-    .about ul {
-      margin-top: 10px;
-      padding-left: 25px;
-    }
-
-    .about li {
-      margin-bottom: 8px;
-    }
-
-    /* Footer Section */
-    footer {
-      margin-top: 40px;
-      padding: 20px;
-      text-align: center;
-      font-size: 16px;
-      opacity: 0.8;
-    }
-
-    footer span {
-      color: #ffff66;
+      padding: 12px;
+      background: #0077cc;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
       font-weight: bold;
+      font-size: 15px;
+      transition: 0.3s;
+    }
+
+    .action-btn:hover {
+      background: #005fa3;
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Fade Animation */
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
     }
   </style>
+
 </head>
+
 <body>
 
-  <!-- 🌟 TOP NAVIGATION -->
-  <div class="navbar">
-    <a href="/index.html">🏠 Home</a>
-    <a href="Room bank/Registration.html">📝 Registration</a>
-    <a href="Room bank/Show bank details.html">Show bank account</a>
-    <a href="Login.html">🔐 Login</a>
-    <a href="Addhar/Addhar.html">Aadhar card registration</a>
-     <a href="Addhar/search.html">Aadhar card Show</a>
-     <a href="home.html">Image</a>
-  </div>
-  <!-- 💫 WELCOME SECTION -->
-  <div class="hero floating">
-    <h1>Welcome to <span style="color: #fff700;">SK Bank</span></h1>
-    <p>Secure • Fast • Smart Banking System</p>
-  </div>
+  <!-- TOP NAVIGATION -->
+  <nav>
+    <h2>Service Dashboard</h2>
+    <div class="nav-btns">
+      <a href="login.html">Bank login</a>
+      <a href="Room bank/Deposit/deposit.html">Bank Account Deposit</a>
+    </div>
+  </nav>
 
-  <!-- 🧾 ABOUT SECTION -->
-  <div class="about">
-    <h2>About SK Bank</h2>
-    <p>
-      <strong>SK Bank</strong> is a modern digital banking platform designed for learning and educational purposes.
-      It demonstrates how online banking works, from account registration to transactions, all using
-      <b>HTML, CSS, and JavaScript</b> — stored safely in your browser’s local storage.
-    </p>
+  <!-- MAIN SECTION -->
+  <div class="container">
 
-    <p>
-      The purpose of SK Bank is to simulate real banking features with creative animation effects
-      and user-friendly design for students and developers who want to understand
-      web-based financial systems.
-    </p>
+    <!-- LEFT SIDE → Aadhaar -->
+    <div class="left">
+      <div class="btn-box">
+        <h3>Aadhaar Services</h3>
+        <a href="Addhar/Addhar.html" class="action-btn">Create Aadhaar Card</a>
+        <a href="Addhar/search.html" class="action-btn">View Aadhaar Card</a>
+      </div>
+    </div>
 
-    <h3>💡 Key Features:</h3>
-    <ul>
-      <li>🔹 Account Registration with auto-generated details</li>
-      <li>🔹 Login and secure local data management</li>
-      <li>🔹 Deposit, Withdrawal, and Transaction Ledger System</li>
-      <li>🔹 Animated Dashboard and Background Effects</li>
-      <li>🔹 Works fully offline (LocalStorage based)</li>
-    </ul>
+    <!-- RIGHT SIDE → Bank -->
+    <div class="right">
+      <div class="btn-box">
+        <h3>Bank Services</h3>
+        <a href="Room bank/registration.html" class="action-btn">Open Bank Account</a>
+        <a href="Room bank/Show bank details.html" class="action-btn">Bank Details</a>
+      </div>
+    </div>
 
-    <h3>🧭 Navigation:</h3>
-    <ul>
-      <li><b>🏠 Home:</b> The welcome page of SK Bank with background animation.</li>
-      <li><b>📝 Registration:</b> Create a new account and generate your customer ID.</li>
-      <li><b>🔐 Login:</b> Access your account securely using stored credentials.</li>
-      <li><b>🏦 Bank Dashboard:</b> View your balance, deposit, and transactions.</li>
-    </ul>
-
-    <p>
-      SK Bank is a secure educational demo, not a real financial institution.
-      All money values and transactions are for learning and testing only.
-    </p>
   </div>
 
-  <!-- 🌍 FOOTER -->
-  <footer>
-    © 2025 <span>SK Bank</span> • Created for Educational Banking Simulation
-  </footer>
-
-  <script>
-    // 🧠 Simple Fade-In on Load
-    window.addEventListener('load', () => {
-      document.body.style.opacity = '1';
-    });
-  </script>
 </body>
 </html>
