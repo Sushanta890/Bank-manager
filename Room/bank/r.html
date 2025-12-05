@@ -213,6 +213,7 @@ function loadAadharDetails() {
 
 // -----------------------------
 // STEP 5 — CREATE ACCOUNT
+// Aadhaar can create ONLY ONE account
 // -----------------------------
 function openAccount() {
     if (!userData) {
@@ -220,13 +221,34 @@ function openAccount() {
         return;
     }
 
+    let aadhaar = document.getElementById("aadharInput").value;
+
+    // ---------------------------------------
+    // CHECK IF AADHAAR ALREADY REGISTERED
+    // ---------------------------------------
+    for (let i = 0; i < localStorage.length; i++) {
+        let key = localStorage.key(i);
+
+        if (key.startsWith("BANK_")) {
+            let stored = JSON.parse(localStorage.getItem(key));
+
+            if (stored.aadhar === aadhaar) {
+                alert("This Aadhaar is already registered!\nAccount No: " + stored.account);
+                return;
+            }
+        }
+    }
+
+    // ---------------------------------------
+    // CREATE NEW ACCOUNT
+    // ---------------------------------------
     let accNo = randomAccount();
     let custID = randomCustomerID();
 
     let bankData = {
         name : (userData.fname || "") + " " + (userData.lname || ""),
         mobile : userData.mobile,
-        aadhar : document.getElementById("aadharInput").value,
+        aadhar : aadhaar,
         account : accNo,
         customerID : custID,
         address : (userData.village || "") + " " + (userData.district || ""),
