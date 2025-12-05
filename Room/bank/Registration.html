@@ -5,19 +5,43 @@
 <title>SK Bank - Zero Balance Account Opening</title>
 
 <style>
-body{font-family:Arial;background:#e9f2ff;padding:20px;}
-#formBox{
-    width:420px;margin:auto;background:#fff;padding:20px;
-    border-radius:10px;box-shadow:0 0 10px #aaa;
+body{
+    font-family:Arial;
+    background:#e9f2ff;
+    padding:20px;
 }
-input{width:100%;padding:8px;margin:10px 0;border-radius:6px;border:1px solid #aaa;}
+#formBox{
+    width:420px;
+    margin:auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px #aaa;
+}
+input{
+    width:100%;
+    padding:8px;
+    margin:10px 0;
+    border-radius:6px;
+    border:1px solid #aaa;
+}
 button{
-    width:100%;padding:10px;background:#0072ff;color:#fff;
-    border:none;border-radius:6px;font-size:16px;cursor:pointer;
+    width:100%;
+    padding:10px;
+    background:#0072ff;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    font-size:16px;
+    cursor:pointer;
 }
 #photo{
-    width:120px;height:120px;margin:auto;display:block;
-    border:1px solid #aaa;object-fit:cover;
+    width:120px;
+    height:120px;
+    margin:auto;
+    display:block;
+    border:1px solid #aaa;
+    object-fit:cover;
 }
 </style>
 </head>
@@ -63,7 +87,12 @@ function randomCustomerID() {
 
 let userData = null;
 
-// STEP 1 → DIRECTLY FETCH AADHAAR (NO OTP)
+// --- FIX: Matches ANY Aadhaar key name ---
+function getAadhaarValue(data){
+    return data.aadhar || data.aadhaar || data.Aadhar || data.aadhar_no || data.uid || null;
+}
+
+// STEP 1 → FETCH AADHAAR
 function fetchAadhaar() {
     let aad = document.getElementById("aadharInput").value.trim();
     userData = null;
@@ -73,12 +102,16 @@ function fetchAadhaar() {
         return;
     }
 
-    // FIND AADHAAR RECORD
-    for(let i=0; i<localStorage.length; i++){
+    // LOOP THROUGH localStorage
+    for(let i = 0; i < localStorage.length; i++){
         let key = localStorage.key(i);
         let data = JSON.parse(localStorage.getItem(key));
 
-        if(data && data.aadhar == aad){
+        if(!data) continue;
+
+        let storedAadhaar = getAadhaarValue(data);
+
+        if(storedAadhaar == aad){
             userData = data;
             break;
         }
@@ -94,15 +127,18 @@ function fetchAadhaar() {
 
 // STEP 2 → DISPLAY AADHAAR DETAILS
 function loadAadharDetails() {
-    document.getElementById("photo").src = userData.photo;
-    document.getElementById("name").innerText = userData.fname + " " + userData.lname;
-    document.getElementById("mobile").innerText = userData.mobile;
-    document.getElementById("gender").innerText = userData.gender;
-    document.getElementById("dob").innerText = userData.dob;
+    document.getElementById("photo").src = userData.photo || "";
+    document.getElementById("name").innerText = (userData.fname || "") + " " + (userData.lname || "");
+    document.getElementById("mobile").innerText = userData.mobile || "";
+    document.getElementById("gender").innerText = userData.gender || "";
+    document.getElementById("dob").innerText = userData.dob || "";
 
     document.getElementById("address").innerText =
-        userData.village + ", " + userData.district + ", " +
-        userData.state + ", " + userData.country + " - " + userData.pin;
+        (userData.village || "") + ", " +
+        (userData.district || "") + ", " +
+        (userData.state || "") + ", " +
+        (userData.country || "") + " - " +
+        (userData.pin || "");
 }
 
 // STEP 3 → CREATE BANK ACCOUNT
@@ -116,12 +152,12 @@ function openAccount() {
     let custID = randomCustomerID();
 
     let bankData = {
-        name : userData.fname + " " + userData.lname,
+        name : (userData.fname || "") + " " + (userData.lname || ""),
         mobile : userData.mobile,
-        aadhar : userData.aadhar,
+        aadhar : getAadhaarValue(userData),
         account : accNo,
         customerID : custID,
-        address : userData.village + " " + userData.district,
+        address : (userData.village || "") + " " + (userData.district || ""),
         photo : userData.photo
     };
 
