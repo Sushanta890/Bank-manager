@@ -22,6 +22,14 @@ body{
 
 h2{text-align:center;}
 
+#balanceSummary{
+    background:#eef7ff;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:20px;
+    font-size:16px;
+}
+
 .tableBox{
     width:48%;
     background:#f7faff;
@@ -94,6 +102,13 @@ button{
 <h2>📄 SK BANK — FULL TRANSACTION HISTORY</h2>
 
 <div id="mainBox">
+
+<!-- BALANCE SUMMARY -->
+<div id="balanceSummary">
+    <b>Total Deposits (Credit):</b> ₹<span id="totalCredit">0</span> &nbsp;&nbsp;
+    <b>Total Payments (Debit):</b> ₹<span id="totalDebit">0</span> &nbsp;&nbsp;
+    <b>Current Balance:</b> ₹<span id="currentBalance">0</span>
+</div>
 
 <div id="filterBox">
     <b>Select Date Range:</b><br><br>
@@ -191,7 +206,10 @@ function loadTables(){
     pendTable.innerHTML =
         `<tr><th>Name</th><th>Amount</th><th>Date & Time</th></tr>`;
 
-    // APPROVED DEPOSITS + BILLS
+    // CALCULATE BALANCES
+    let totalCredit = 0;
+    let totalDebit = 0;
+
     bankUser.history.forEach(t => {
 
         // APPROVED DEPOSITS
@@ -202,8 +220,8 @@ function loadTables(){
                     <td>₹${t.amount}</td>
                     <td>${t.datetime}</td>
                 </tr>`;
+            totalCredit += Number(t.amount);
         }
-
         // PURCHASE / BILLS
         else{
             othTable.innerHTML += `
@@ -212,10 +230,11 @@ function loadTables(){
                     <td>₹${t.amount}</td>
                     <td>${t.datetime}</td>
                 </tr>`;
+            totalDebit += Number(t.amount);
         }
     });
 
-    // PENDING DEPOSITS (Correct Source: bankUser.pending)
+    // PENDING DEPOSITS
     if(bankUser.pending.length > 0){
         bankUser.pending.forEach(p => {
             pendTable.innerHTML += `
@@ -226,6 +245,11 @@ function loadTables(){
                 </tr>`;
         });
     }
+
+    // UPDATE BALANCE SUMMARY
+    document.getElementById("totalCredit").innerText = totalCredit;
+    document.getElementById("totalDebit").innerText = totalDebit;
+    document.getElementById("currentBalance").innerText = totalCredit - totalDebit;
 }
 
 function downloadHistory(){
