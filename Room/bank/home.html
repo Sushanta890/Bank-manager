@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SK Bank - Home</title>
+
+<style>
+body{
+    margin:0;
+    padding:0;
+    background:#e9f2ff;
+    font-family:Arial;
+}
+
+header{
+    background:#0072ff;
+    padding:20px;
+    text-align:center;
+    color:white;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.container{
+    width:90%;
+    max-width:450px;
+    margin:auto;
+    margin-top:40px;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 0 12px rgba(0,0,0,0.2);
+}
+
+.btn{
+    width:100%;
+    padding:15px;
+    margin:12px 0;
+    font-size:18px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    color:white;
+}
+
+.reg{ background:#0072ff; }
+.login{ background:#28b463; }
+.kyc{ background:#f39c12; }
+.show{ background:#8e44ad; }
+
+.btn:hover{
+    opacity:.9;
+}
+
+footer{
+    text-align:center;
+    margin-top:40px;
+    color:#333;
+    font-size:14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+    SK BANK — Digital Banking Portal
+</header>
+
+<div class="container">
+
+    <button class="btn reg" onclick="location.href='r.html'">
+        📝 New Account Registration
+    </button>
+
+    <button class="btn login" onclick="location.href='Login.html'">
+        🔐 Login
+    </button>
+
+    <button class="btn kyc" onclick="location.href='kyc.html'">
+        🧾 Update KYC
+    </button>
+
+    <button class="btn show" onclick="location.href='Show bank details.html'">
+        📘 View Account Details
+    </button>
+
+</div>
+
+<footer>
+    © 2025 SK Bank - All Rights Reserved
+</footer>
+
+</body>
+</html>

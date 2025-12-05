@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>SK Bank - Zero Balance Account Opening</title>
+<title>SK Bank - Account Delete System</title>
 
 <style>
 body{
@@ -55,7 +55,7 @@ button{
 
 <body>
 
-<h2 align="center">SK BANK — Zero Balance Account Opening</h2>
+<h2 align="center">SK BANK — Account Delete System</h2>
 
 <div id="formBox">
 
@@ -81,14 +81,19 @@ button{
 
 <hr>
 
-<button onclick="openAccount()">Open Account</button>
+<!-- ❌ REMOVED OPEN ACCOUNT BUTTON -->
+<!-- ONLY DELETE BUTTON BELOW -->
+
+<button onclick="deleteBankAccount()" style="background:red; margin-top:10px;">
+    Delete Bank Account (Using Account Number)
+</button>
 
 </div>
 
 <script>
 
 // -----------------------------
-// RANDOM GENERATORS
+// RANDOM GENERATORS (Unused but kept if needed)
 // -----------------------------
 function randomAccount() {
     return Math.floor(100000000000000 + Math.random() * 900000000000000);
@@ -110,12 +115,9 @@ let otpVerified = false;
 function deepSearch(obj, aad) {
     for (let key in obj) {
         let value = obj[key];
-
         if (!value) continue;
 
-        if (String(value).replace(/\D/g, "") === aad) {
-            return obj;
-        }
+        if (String(value).replace(/\D/g, "") === aad) return obj;
 
         if (typeof value === "object") {
             let result = deepSearch(value, aad);
@@ -140,7 +142,6 @@ function sendOTP() {
     otpVerified = false;
 
     alert("OTP Generated: " + generatedOTP);
-
     document.getElementById("otpBox").style.display = "block";
 }
 
@@ -160,7 +161,7 @@ function verifyOTP() {
 }
 
 // -----------------------------
-// STEP 3 — FETCH AADHAAR AFTER OTP
+// STEP 3 — FETCH AADHAAR
 // -----------------------------
 function fetchAadhaar() {
     if (!otpVerified) {
@@ -202,7 +203,6 @@ function loadAadharDetails() {
     document.getElementById("mobile").innerText = userData.mobile || "";
     document.getElementById("gender").innerText = userData.gender || "";
     document.getElementById("dob").innerText = userData.dob || "";
-
     document.getElementById("address").innerText =
         (userData.village || "") + ", " +
         (userData.district || "") + ", " +
@@ -211,56 +211,56 @@ function loadAadharDetails() {
         (userData.pin || "");
 }
 
-// -----------------------------
-// STEP 5 — CREATE ACCOUNT
-// Aadhaar can create ONLY ONE account
-// -----------------------------
-function openAccount() {
-    if (!userData) {
-        alert("Fetch Aadhaar details first!");
+// ---------------------------------------------------------
+// ⭐ DELETE BANK ACCOUNT USING ACCOUNT NUMBER
+// ---------------------------------------------------------
+function deleteBankAccount() {
+
+    let accNo = prompt("Enter Bank Account Number to Delete:");
+
+    if (!accNo) {
+        alert("Please enter valid account number!");
         return;
     }
 
-    let aadhaar = document.getElementById("aadharInput").value;
+    let foundKey = null;
 
-    // ---------------------------------------
-    // CHECK IF AADHAAR ALREADY REGISTERED
-    // ---------------------------------------
     for (let i = 0; i < localStorage.length; i++) {
+
         let key = localStorage.key(i);
+        let raw = localStorage.getItem(key);
 
-        if (key.startsWith("BANK_")) {
-            let stored = JSON.parse(localStorage.getItem(key));
+        try {
+            let data = JSON.parse(raw);
 
-            if (stored.aadhar === aadhaar) {
-                alert("This Aadhaar is already registered!\nAccount No: " + stored.account);
-                return;
+            if (data && data.account && String(data.account) === String(accNo)) {
+                foundKey = key;
+                break;
             }
-        }
+
+        } catch {}
     }
 
-    // ---------------------------------------
-    // CREATE NEW ACCOUNT
-    // ---------------------------------------
-    let accNo = randomAccount();
-    let custID = randomCustomerID();
+    if (!foundKey) {
+        alert("Account NOT FOUND in localStorage!");
+        return;
+    }
 
-    let bankData = {
-        name : (userData.fname || "") + " " + (userData.lname || ""),
-        mobile : userData.mobile,
-        aadhar : aadhaar,
-        account : accNo,
-        customerID : custID,
-        address : (userData.village || "") + " " + (userData.district || ""),
-        photo : userData.photo
-    };
+    let info = JSON.parse(localStorage.getItem(foundKey));
 
-    localStorage.setItem("BANK_" + userData.mobile, JSON.stringify(bankData));
+    let confirmDelete = confirm(
+        "Delete this account?\n" +
+        "Name: " + info.name + "\n" +
+        "Account No: " + info.account
+    );
 
-    alert("Account Created Successfully!\nAccount No: " + accNo + "\nCustomer ID: " + custID);
+    if (confirmDelete) {
+        localStorage.removeItem(foundKey);
+        alert("Account deleted successfully!");
+    }
 }
 
 </script>
 
-</body> 
+</body>
 </html>

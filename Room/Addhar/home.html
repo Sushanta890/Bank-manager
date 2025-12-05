@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Aadhaar Portal - Home</title>
+
+<style>
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial, sans-serif;
+    background:#e9f2ff;
+    animation: bgFade 5s infinite alternate;
+}
+
+/* Background fade animation */
+@keyframes bgFade {
+    0% { background-color: #e9f2ff; }
+    50% { background-color: #d0e8ff; }
+    100% { background-color: #e9f2ff; }
+}
+
+header{
+    background:#0072ff;
+    color:white;
+    text-align:center;
+    padding:20px;
+    font-size:28px;
+    font-weight:bold;
+    animation: fadeInDown 1s ease forwards;
+}
+
+/* Header fade-in from top */
+@keyframes fadeInDown {
+    0% { opacity:0; transform: translateY(-50px); }
+    100% { opacity:1; transform: translateY(0); }
+}
+
+.container{
+    width:90%;
+    max-width:400px;
+    margin:auto;
+    margin-top:50px;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 0 12px rgba(0,0,0,0.2);
+    animation: popUp 1s ease forwards;
+}
+
+/* Container pop-up effect */
+@keyframes popUp {
+    0% { opacity:0; transform: scale(0.8); }
+    100% { opacity:1; transform: scale(1); }
+}
+
+.btn{
+    width:100%;
+    padding:15px;
+    margin:12px 0;
+    font-size:18px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    color:white;
+    transition: all 0.3s ease;
+}
+
+/* Button colors */
+.registration{ background:#0072ff; }
+.showDetails{ background:#28b463; }
+.kyc{ background:#f39c12; }
+
+/* Hover animations for buttons */
+.btn:hover{
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    opacity:0.9;
+}
+
+/* Bounce effect when clicked */
+.btn:active{
+    transform: translateY(2px) scale(0.98);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+footer{
+    text-align:center;
+    margin-top:40px;
+    font-size:14px;
+    color:#333;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    Aadhaar Portal
+</header>
+
+<div class="container">
+
+    <button class="btn registration" onclick="location.href='registration.html'">
+        📝 Registration
+    </button>
+
+    <button class="btn showDetails" onclick="location.href='search.html'">
+        📘 Show Aadhaar Details
+    </button>
+
+    <button class="btn kyc" onclick="location.href='kyc.html'">
+        🧾 KYC Update
+    </button>
+
+</div>
+
+<footer>
+    © 2025 Aadhaar Portal
+</footer>
+
+</body>
+</html>
