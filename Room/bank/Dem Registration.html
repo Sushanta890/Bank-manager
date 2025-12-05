@@ -43,13 +43,6 @@ button{
     border:1px solid #aaa;
     object-fit:cover;
 }
-#otpBox{
-    display:none;
-    background:#eef7ff;
-    padding:15px;
-    margin-top:10px;
-    border-radius:8px;
-}
 </style>
 </head>
 
@@ -60,14 +53,7 @@ button{
 <div id="formBox">
 
 <input type="text" id="aadharInput" placeholder="Enter Aadhaar Number">
-
-<button onclick="sendOTP()">Generate OTP</button>
-
-<div id="otpBox">
-    <p><b>OTP sent successfully!</b></p>
-    <input type="text" id="otpInput" placeholder="Enter OTP">
-    <button onclick="verifyOTP()">Verify OTP</button>
-</div>
+<button onclick="fetchAadhaar()">Fetch Aadhaar Details</button>
 
 <hr>
 
@@ -87,9 +73,7 @@ button{
 
 <script>
 
-// -----------------------------
-// RANDOM GENERATORS
-// -----------------------------
+// Random Generators
 function randomAccount() {
     return Math.floor(100000000000000 + Math.random() * 900000000000000);
 }
@@ -97,92 +81,61 @@ function randomCustomerID() {
     return Math.floor(1000000000 + Math.random() * 9000000000);
 }
 
-// -----------------------------
-// GLOBAL VARIABLES
-// -----------------------------
 let userData = null;
-let generatedOTP = null;
-let otpVerified = false;
 
-// -----------------------------
-// UNIVERSAL AADHAAR DEEP SEARCH
-// -----------------------------
+// =============================
+// DEEP SEARCH FOR AADHAAR
+// =============================
 function deepSearch(obj, aad) {
     for (let key in obj) {
+
         let value = obj[key];
 
         if (!value) continue;
 
+        // If value matches Aadhaar
         if (String(value).replace(/\D/g, "") === aad) {
             return obj;
         }
 
+        // If value is an object — search inside it
         if (typeof value === "object") {
-            let result = deepSearch(value, aad);
-            if (result) return result;
+            let found = deepSearch(value, aad);
+            if (found) return found;
         }
     }
     return null;
 }
 
-// -----------------------------
-// STEP 1 — GENERATE OTP
-// -----------------------------
-function sendOTP() {
-    let aad = document.getElementById("aadharInput").value.trim();
-
-    if (aad.length !== 12) {
-        alert("Enter valid 12-digit Aadhaar number!");
-        return;
-    }
-
-    generatedOTP = Math.floor(100000 + Math.random() * 900000);
-    otpVerified = false;
-
-    alert("OTP Generated: " + generatedOTP);
-
-    document.getElementById("otpBox").style.display = "block";
-}
-
-// -----------------------------
-// STEP 2 — VERIFY OTP
-// -----------------------------
-function verifyOTP() {
-    let entered = document.getElementById("otpInput").value;
-
-    if (entered == generatedOTP) {
-        otpVerified = true;
-        alert("OTP Verified Successfully!");
-        fetchAadhaar();
-    } else {
-        alert("Invalid OTP. Try again!");
-    }
-}
-
-// -----------------------------
-// STEP 3 — FETCH AADHAAR AFTER OTP
-// -----------------------------
+// STEP 1 — FETCH AADHAAR
 function fetchAadhaar() {
-    if (!otpVerified) {
-        alert("Please verify OTP first!");
-        return;
-    }
-
     let aad = document.getElementById("aadharInput").value.trim();
     userData = null;
 
+    if (aad.length < 4) {
+        alert("Enter a valid Aadhaar number!");
+        return;
+    }
+
+    // Scan entire localStorage
     for (let i = 0; i < localStorage.length; i++) {
         let key = localStorage.key(i);
         let raw = localStorage.getItem(key);
 
+        if (!raw) continue;
+
         try {
             let data = JSON.parse(raw);
             let found = deepSearch(data, aad);
+
             if (found) {
                 userData = found;
                 break;
             }
-        } catch {}
+
+        } catch (err) {
+            continue;
+        }
     }
 
     if (!userData) {
@@ -193,9 +146,7 @@ function fetchAadhaar() {
     loadAadharDetails();
 }
 
-// -----------------------------
-// STEP 4 — SHOW DETAILS
-// -----------------------------
+// Display Aadhaar details
 function loadAadharDetails() {
     document.getElementById("photo").src = userData.photo || "";
     document.getElementById("name").innerText = (userData.fname || "") + " " + (userData.lname || "");
@@ -211,9 +162,7 @@ function loadAadharDetails() {
         (userData.pin || "");
 }
 
-// -----------------------------
-// STEP 5 — CREATE ACCOUNT
-// -----------------------------
+// Create Bank Account
 function openAccount() {
     if (!userData) {
         alert("Fetch Aadhaar details first!");
