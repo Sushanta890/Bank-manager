@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Aadhaar KYC Linking</title>
+<style>
+body{font-family:Arial;background:#eef3ff;padding:20px;}
+#formBox{
+    width:450px;margin:auto;background:#fff;padding:20px;
+    border-radius:10px;box-shadow:0 0 10px #bbb;
+}
+input, select{width:100%;padding:8px;margin:10px 0;border-radius:5px;border:1px solid #aaa;}
+button{padding:10px;width:100%;border:none;background:#0b63d1;color:#fff;font-size:16px;border-radius:5px;cursor:pointer;}
+#photoPreview{width:120px;height:120px;margin:auto;display:block;border:1px solid #aaa;object-fit:cover;}
+#otpBox,#kycBox{display:none;background:#eef7ff;padding:15px;margin-top:10px;border-radius:8px;}
+.updated{animation:highlight 1s;}
+@keyframes highlight{
+    from{background:#d4edda;}
+    to{background:transparent;}
+}
+</style>
+</head>
+<body>
+
+<h2 align="center">SK BANK — Aadhaar KYC Linking</h2>
+
+<div id="formBox">
+<input type="text" id="aadhaarInput" placeholder="Enter Aadhaar Number">
+<button onclick="generateOTP()">Generate OTP</button>
+
+<div id="otpBox">
+    <p><b>OTP Sent Successfully!</b></p>
+    <input type="text" id="otpInput" placeholder="Enter OTP">
+    <button onclick="verifyOTP()">Verify OTP</button>
+</div>
+
+<div id="kycBox">
+    <hr>
+    <img id="photoPreview">
+    <input type="text" id="fname" placeholder="First Name">
+    <input type="text" id="lname" placeholder="Last Name">
+    <input type="text" id="mobile" placeholder="Mobile Number">
+    <select id="gender">
+        <option value="">Select Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+    </select>
+    <input type="date" id="dob" placeholder="Date of Birth">
+    <input type="text" id="village" placeholder="Village">
+    <input type="text" id="state" placeholder="State">
+    <input type="text" id="district" placeholder="District">
+    <input type="text" id="country" placeholder="Country">
+    <input type="number" id="pin" placeholder="PIN">
+    <input type="file" id="photo">
+    <button onclick="saveKYC()">Save KYC Details</button>
+</div>
+</div>
+
+<script>
+let generatedOTP = null;
+let currentUser = null;
+
+// Preview Photo & convert to Base64
+let base64Photo = "";
+photo.onchange = function(){
+    let file = this.files[0];
+    let reader = new FileReader();
+    reader.onload = function(){ 
+        base64Photo = reader.result;
+        photoPreview.src = base64Photo;
+    }
+    reader.readAsDataURL(file);
+}
+
+// Step 1: Generate OTP
+function generateOTP(){
+    let aad = aadhaarInput.value.trim();
+    if(aad.length !== 12){ alert("Enter 12-digit Aadhaar!"); return; }
+    currentUser = null;
+    
+    // Search in localStorage
+    for(let i=0;i<localStorage.length;i++){
+        let key = localStorage.key(i);
+        let data = JSON.parse(localStorage.getItem(key));
+        if(data.aadhar == aad){
+            currentUser = data;
+            break;
+        }
+    }
+    if(!currentUser){ alert("Aadhaar not found!"); return; }
+    generatedOTP = Math.floor(100000 + Math.random()*900000);
+    alert("OTP Generated: "+generatedOTP);
+    otpBox.style.display="block";
+}
+
+// Step 2: Verify OTP
+function verifyOTP(){
+    let entered = otpInput.value.trim();
+    if(entered == generatedOTP){
+        alert("OTP Verified!");
+        showKYCForm();
+    } else { alert("Invalid OTP!"); }
+}
+
+// Step 3: Show KYC Form
+function showKYCForm(){
+    kycBox.style.display="block";
+    fname.value = currentUser.fname || "";
+    lname.value = currentUser.lname || "";
+    mobile.value = currentUser.mobile || "";
+    gender.value = currentUser.gender || "";
+    dob.value = currentUser.dob || "";
+    village.value = currentUser.village || "";
+    state.value = currentUser.state || "";
+    district.value = currentUser.district || "";
+    country.value = currentUser.country || "";
+    pin.value = currentUser.pin || "";
+    base64Photo = currentUser.photo || "";
+    photoPreview.src = base64Photo;
+}
+
+// Step 4: Save KYC
+function saveKYC(){
+    currentUser.fname = fname.value.trim();
+    currentUser.lname = lname.value.trim();
+    currentUser.mobile = mobile.value.trim();
+    currentUser.gender = gender.value;
+    currentUser.dob = dob.value;
+    currentUser.village = village.value.trim();
+    currentUser.state = state.value.trim();
+    currentUser.district = district.value.trim();
+    currentUser.country = country.value.trim();
+    currentUser.pin = pin.value.trim();
+    if(base64Photo) currentUser.photo = base64Photo;
+
+    localStorage.setItem(currentUser.mobile, JSON.stringify(currentUser));
+
+    // Animation effect
+    kycBox.classList.add("updated");
+    setTimeout(()=>{ kycBox.classList.remove("updated"); },1000);
+
+    alert("KYC Updated Successfully! Redirecting to Home Page...");
+    
+    // Redirect to home/dashboard page
+    setTimeout(()=>{ window.location.href = "home.html/"; }, 500);
+}
+</script>
+</body>
+</html>
