@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SK Bank – Full Transaction History</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#e9f2ff;
+    padding:20px;
+}
+
+#mainBox{
+    width:95%;
+    margin:auto;
+    padding:20px;
+    background:white;
+    border-radius:10px;
+    box-shadow:0 0 10px #999;
+}
+
+h2{text-align:center;}
+
+.tableBox{
+    width:48%;
+    background:#f7faff;
+    padding:15px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    height:420px;
+    overflow:auto;
+}
+
+table{width:100%; border-collapse:collapse;}
+
+th{
+    background:#007bff;
+    color:white;
+    padding:8px;
+    font-size:15px;
+}
+
+td{
+    padding:6px;
+    border-bottom:1px solid #ccc;
+    font-size:14px;
+}
+
+.rowAnim{
+    animation:fadeIn 0.6s;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+#filterBox{
+    background:#eef7ff;
+    padding:15px;
+    border-radius:10px;
+    margin-top:20px;
+}
+
+button{
+    padding:8px 15px;
+    border:none;
+    background:#007bff;
+    color:white;
+    font-size:14px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+/* FULL-WIDTH PENDING SECTION */
+#pendingBox{
+    margin-top:25px;
+    background:#fff7e6;
+    border:1px solid #ffb84d;
+    padding:20px;
+    border-radius:10px;
+}
+
+#pendingBox h3{
+    text-align:center;
+    color:#cc6600;
+}
+</style>
+</head>
+
+<body>
+
+<h2>📄 SK BANK — FULL TRANSACTION HISTORY</h2>
+
+<div id="mainBox">
+
+<div id="filterBox">
+    <b>Select Date Range:</b><br><br>
+    From: <input type="date" id="fromDate">
+    To: <input type="date" id="toDate">
+    <button onclick="downloadHistory()">Download</button>
+    <button onclick="printHistory()">Print</button>
+</div>
+
+<br>
+
+<div style="display:flex; justify-content:space-between;">
+
+    <div class="tableBox">
+        <h3 align="center">💰 Deposit Transactions</h3>
+        <table id="depositTable">
+            <tr>
+                <th>Name</th><th>Amount</th><th>Date & Time</th>
+            </tr>
+        </table>
+    </div>
+
+    <div class="tableBox">
+        <h3 align="center">🧾 Purchase & Bills</h3>
+        <table id="otherTable">
+            <tr>
+                <th>Type</th><th>Amount</th><th>Date & Time</th>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+<!-- PENDING PAYMENT SECTION -->
+<div id="pendingBox">
+    <h3>⏳ Deposit Pending Payments (Full List)</h3>
+
+    <table id="pendingTable">
+        <tr>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Date & Time</th>
+        </tr>
+    </table>
+</div>
+
+</div>
+
+<script>
+
+let bankUser = null;
+
+function loadUser() {
+    let acc = sessionStorage.getItem("SK_CURRENT_ACC");
+
+    if(!acc){
+        alert("Login first!");
+        window.location.href = "login.html";
+        return;
+    }
+
+    for(let i=0; i<localStorage.length; i++){
+        let key = localStorage.key(i);
+        if(key.startsWith("BANK_")){
+            let data = JSON.parse(localStorage.getItem(key));
+            if(data.account == acc){
+                bankUser = data;
+                break;
+            }
+        }
+    }
+
+    if(!bankUser){
+        alert("User not found!");
+        return;
+    }
+
+    if(!bankUser.history) bankUser.history = [];
+    if(!bankUser.pending) bankUser.pending = [];
+
+    loadTables();
+}
+
+function loadTables(){
+    let depTable = document.getElementById("depositTable");
+    let othTable = document.getElementById("otherTable");
+    let pendTable = document.getElementById("pendingTable");
+
+    depTable.innerHTML =
+        `<tr><th>Name</th><th>Amount</th><th>Date & Time</th></tr>`;
+
+    othTable.innerHTML =
+        `<tr><th>Type</th><th>Amount</th><th>Date & Time</th></tr>`;
+
+    pendTable.innerHTML =
+        `<tr><th>Name</th><th>Amount</th><th>Date & Time</th></tr>`;
+
+    // APPROVED DEPOSITS + BILLS
+    bankUser.history.forEach(t => {
+
+        // APPROVED DEPOSITS
+        if(t.type === "Deposit Approved"){
+            depTable.innerHTML += `
+                <tr class="rowAnim">
+                    <td>${t.depositor}</td>
+                    <td>₹${t.amount}</td>
+                    <td>${t.datetime}</td>
+                </tr>`;
+        }
+
+        // PURCHASE / BILLS
+        else{
+            othTable.innerHTML += `
+                <tr class="rowAnim">
+                    <td>${t.type}</td>
+                    <td>₹${t.amount}</td>
+                    <td>${t.datetime}</td>
+                </tr>`;
+        }
+    });
+
+    // PENDING DEPOSITS (Correct Source: bankUser.pending)
+    if(bankUser.pending.length > 0){
+        bankUser.pending.forEach(p => {
+            pendTable.innerHTML += `
+                <tr class="rowAnim">
+                    <td>${p.depositor}</td>
+                    <td>₹${p.amount}</td>
+                    <td>${p.datetime}</td>
+                </tr>`;
+        });
+    }
+}
+
+function downloadHistory(){
+    let f = document.getElementById("fromDate").value;
+    let t = document.getElementById("toDate").value;
+
+    if(!f || !t){
+        alert("Select both dates!");
+        return;
+    }
+
+    let text = "SK BANK - Transaction History\n";
+    text += "From: "+f+"  To: "+t+"\n\n";
+
+    bankUser.history.forEach(tn => {
+        let d = tn.datetime.split(" ")[0];
+
+        if(d >= f && d <= t){
+            text += `${tn.type} | ₹${tn.amount} | ${tn.datetime}\n`;
+        }
+    });
+
+    let file = new Blob([text], {type:'text/plain'});
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(file);
+    a.download = "SK_Transaction_History.txt";
+    a.click();
+}
+
+function printHistory(){
+    window.print();
+}
+
+loadUser();
+</script>
+
+</body>
+</html>

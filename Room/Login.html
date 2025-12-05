@@ -102,6 +102,7 @@ document.getElementById("billType").addEventListener("change", function(){
         document.getElementById("itemName").style.display = "block";
     } else {
         document.getElementById("itemName").style.display = "none";
+        document.getElementById("itemName").value = "";
     }
 });
 
@@ -134,7 +135,7 @@ function login() {
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
 
-    document.getElementById("photo").src = user.photo;
+    document.getElementById("photo").src = user.photo || "";
     document.getElementById("d_name").innerText = user.name;
     document.getElementById("d_mobile").innerText = user.mobile;
     document.getElementById("d_account").innerText = user.account;
@@ -186,7 +187,16 @@ function payBill() {
     localStorage.setItem("BANK_"+user.mobile, JSON.stringify(user));
 
     alert("Payment Successful!");
+
+    // UPDATE BALANCE
     document.getElementById("balance").innerText = user.balance;
+
+    // ✅ AUTO CLEAR INPUTS AFTER PAYMENT
+    document.getElementById("billType").value = "";
+    document.getElementById("billAmt").value = "";
+    document.getElementById("itemName").value = "";
+    document.getElementById("itemName").style.display = "none";
+
     showHistory();
 }
 

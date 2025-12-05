@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SK Bank – Secure Login</title>
+
+<style>
+body{
+    background:#e8f1ff;
+    font-family:Arial;
+    padding:40px;
+}
+#loginBox{
+    width:90%;
+    max-width:380px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 0 10px #777;
+}
+input{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    font-size:16px;
+    border:1px solid #999;
+    border-radius:6px;
+}
+button{
+    width:100%;
+    margin-top:15px;
+    padding:10px;
+    font-size:17px;
+    border:none;
+    border-radius:6px;
+    background:#007bff;
+    color:white;
+    cursor:pointer;
+}
+h2{text-align:center;}
+#otpBox{display:none;}
+</style>
+</head>
+
+<body>
+
+<div id="loginBox">
+    <h2>🔐 SK Bank Login</h2>
+
+    <label>Enter Account Number:</label>
+    <input type="number" id="accInput" placeholder="Enter Account Number">
+
+    <button onclick="generateOTP()">Generate OTP</button>
+
+    <div id="otpBox">
+        <label>Enter OTP:</label>
+        <input type="number" id="otpInput" placeholder="Enter OTP">
+
+        <button onclick="verifyOTP()">Login</button>
+    </div>
+</div>
+
+
+<script>
+let realOTP = "";
+let accountFound = null;
+
+/* STEP 1 – GENERATE OTP */
+function generateOTP(){
+    let acc = document.getElementById("accInput").value;
+
+    if(!acc){
+        alert("Enter your account number!");
+        return;
+    }
+
+    // FIND ACCOUNT IN LOCAL STORAGE
+    accountFound = null;
+
+    for(let i=0; i<localStorage.length; i++){
+        let key = localStorage.key(i);
+
+        if(key.startsWith("BANK_")){
+            let data = JSON.parse(localStorage.getItem(key));
+            if(data.account == acc){
+                accountFound = data;
+                break;
+            }
+        }
+    }
+
+    if(!accountFound){
+        alert("Account not found!");
+        return;
+    }
+
+    // 4-DIGIT OTP
+    realOTP = Math.floor(1000 + Math.random()*9000).toString();
+
+    alert("Your OTP is: " + realOTP);
+
+    document.getElementById("otpBox").style.display = "block";
+}
+
+/* STEP 2 – VERIFY OTP */
+function verifyOTP(){
+    let entered = document.getElementById("otpInput").value;
+
+    if(entered === realOTP){
+        alert("Login Successful!");
+
+        // SET SESSION STORAGE FOR NEXT PAGE
+        sessionStorage.setItem("SK_CURRENT_ACC", accountFound.account);
+
+        // REDIRECT TO HISTORY PAGE
+        window.location.href = "history.html";
+
+    } else {
+        alert("Wrong OTP!");
+    }
+}
+</script>
+
+</body>
+</html>

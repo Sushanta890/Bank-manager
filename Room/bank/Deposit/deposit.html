@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>SK Bank - Deposit Money</title>
+<title>SK Bank - Deposit Pending Approve</title>
 
 <style>
 body{font-family:Arial;background:#eef4ff;padding:20px;}
@@ -28,15 +28,30 @@ p{font-size:17px;}
     border:1px solid #ccc;max-height:200px;overflow:auto;
 }
 .history-item{
-    background:#fff;padding:8px;margin:6px 0;border-left:4px solid #007bff;
-    border-radius:4px;font-size:14px;
+    background:#fff;padding:8px;margin:6px 0;
+    border-left:4px solid #007bff;border-radius:4px;
+    font-size:14px;
+}
+.pending-box{
+    background:#fff3cd;padding:10px;border-radius:5px;
+    border:1px solid #ffcc00;max-height:200px;overflow:auto;
+}
+.pending-item{
+    background:#fff;padding:8px;margin:6px 0;
+    border-left:4px solid orange;border-radius:4px;
+    font-size:14px;
+}
+.approve-btn{
+    background:green;color:white;padding:5px 10px;
+    border:none;border-radius:4px;cursor:pointer;
+    font-size:13px;margin-top:5px;
 }
 </style>
 </head>
 
 <body>
 
-<h2 align="center">SK BANK — Deposit Money</h2>
+<h2 align="center">SK BANK — Deposit Pending Approval</h2>
 
 <div id="box">
 
@@ -56,11 +71,14 @@ p{font-size:17px;}
 
 <input type="text" id="depName" placeholder="Enter Depositor Name">
 <input type="number" id="amount" placeholder="Enter Deposit Amount">
-<button onclick="depositMoney()">Deposit</button>
+<button onclick="addPending()">Deposit (Pending)</button>
 
 <hr>
+<h3>Pending Deposits (Require Approval)</h3>
+<div id="pending" class="pending-box"></div>
 
-<h3>Transaction History</h3>
+<hr>
+<h3>Approved History</h3>
 <div id="history" class="history-box"></div>
 
 </div>
@@ -69,7 +87,7 @@ p{font-size:17px;}
 
 let bankUser = null;
 
-// Fetch Account Details by Account Number
+// Fetch Account
 function fetchAccount() {
     let acc = document.getElementById("accInput").value.trim();
     bankUser = null;
@@ -91,13 +109,9 @@ function fetchAccount() {
         return;
     }
 
-    if(bankUser.balance === undefined){
-        bankUser.balance = 0;
-    }
-
-    if(!bankUser.history){
-        bankUser.history = [];
-    }
+    if(bankUser.balance === undefined) bankUser.balance = 0;
+    if(!bankUser.history) bankUser.history = [];
+    if(!bankUser.pending) bankUser.pending = [];
 
     document.getElementById("photo").src = bankUser.photo;
     document.getElementById("name").innerText = bankUser.name;
@@ -105,11 +119,12 @@ function fetchAccount() {
     document.getElementById("account").innerText = bankUser.account;
     document.getElementById("balance").innerText = bankUser.balance;
 
+    showPending();
     showHistory();
 }
 
-// Deposit Money + Store History
-function depositMoney() {
+// Add deposit to pending
+function addPending() {
     if(!bankUser){
         alert("Find account first!");
         return;
@@ -122,42 +137,92 @@ function depositMoney() {
         alert("Enter depositor name!");
         return;
     }
-
     if(amt <= 0){
-        alert("Enter a valid deposit amount!");
+        alert("Enter valid amount!");
         return;
     }
 
-    bankUser.balance += amt;
-
     let now = new Date();
-    let dateTime = now.toLocaleDateString() + " " + now.toLocaleTimeString();
+    let dateTime = now.toLocaleDateString()+" "+now.toLocaleTimeString();
 
-    let trans = {
-        type: "Deposit",
+    let pendingTrans = {
+        id: Date.now(),
         depositor: depositor,
         amount: amt,
         datetime: dateTime
     };
 
-    bankUser.history.unshift(trans);
+    bankUser.pending.unshift(pendingTrans);
 
     localStorage.setItem("BANK_"+bankUser.mobile, JSON.stringify(bankUser));
 
-    alert("Deposit Successful! New Balance: ₹" + bankUser.balance);
+    alert("Deposit added to PENDING list!");
+
+    showPending();
+}
+
+// Approve deposit
+function approveDeposit(id){
+    let trans = bankUser.pending.find(t => t.id == id);
+    if(!trans) return;
+
+    bankUser.balance += trans.amount;
+
+    bankUser.history.unshift({
+        type: "Deposit Approved",
+        depositor: trans.depositor,
+        amount: trans.amount,
+        datetime: trans.datetime
+    });
+
+    bankUser.pending = bankUser.pending.filter(t => t.id != id);
+
+    localStorage.setItem("BANK_"+bankUser.mobile, JSON.stringify(bankUser));
 
     document.getElementById("balance").innerText = bankUser.balance;
 
+    showPending();
     showHistory();
 }
 
-// Display Transaction History
+// Show pending (UPDATED LEFT + RIGHT SIDE)
+function showPending(){
+    let box = document.getElementById("pending");
+    box.innerHTML = "";
+
+    if(bankUser.pending.length === 0){
+        box.innerHTML = "<p>No pending deposits.</p>";
+        return;
+    }
+
+    bankUser.pending.forEach(item => {
+        box.innerHTML += `
+            <div class="pending-item" style="display:flex;justify-content:space-between;align-items:center;">
+
+                <div>
+                    <b>₹${item.amount}</b><br>
+                    <small>${item.depositor}</small>
+                </div>
+
+                <div style="text-align:right;">
+                    <small>${item.datetime}</small><br>
+                    <button class="approve-btn" onclick="approveDeposit(${item.id})">
+                        Approve
+                    </button>
+                </div>
+
+            </div>
+        `;
+    });
+}
+
+// Show approved history
 function showHistory(){
     let box = document.getElementById("history");
     box.innerHTML = "";
 
-    if(!bankUser.history || bankUser.history.length == 0){
-        box.innerHTML = "<p>No transactions yet.</p>";
+    if(bankUser.history.length === 0){
+        box.innerHTML = "<p>No approved history yet.</p>";
         return;
     }
 
@@ -165,7 +230,7 @@ function showHistory(){
         box.innerHTML += `
             <div class="history-item">
                 <b>${item.type}</b> - ₹${item.amount}<br>
-                <b>By:</b> ${item.depositor}<br>
+                By: ${item.depositor}<br>
                 <small>${item.datetime}</small>
             </div>
         `;
