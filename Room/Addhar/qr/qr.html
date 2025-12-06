@@ -61,19 +61,19 @@ button{padding:10px;width:100%;border:none;background:#0b63d1;color:#fff;font-si
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
-// Preview & convert image to Base64
+// Photo Preview & Base64
 let base64Photo = "";
 photo.onchange = function(){
     let file = this.files[0];
     let reader = new FileReader();
     reader.onload = function(){
         base64Photo = reader.result;
-        photoPreview.src = base64Photo; // image store permanent
+        photoPreview.src = base64Photo;
     }
     reader.readAsDataURL(file);
 }
 
-// State - City Data
+// State - District Data
 const cityData={
 "India":{"Odisha":["Rayagada","Koraput","Malkangiri"],
 "AP":["Visakhapatnam","Vijayawada"]},
@@ -94,7 +94,7 @@ function loadCity(){
     })
 }
 
-// Generate 12-digit Aadhaar number
+// Generate 12-digit Aadhaar
 function randomAadhar(){
     return Math.floor(100000000000 + Math.random()*900000000000);
 }
@@ -103,16 +103,23 @@ function randomAadhar(){
 function generateQR(aadhar){
     return new Promise((resolve)=>{
         let tempDiv = document.createElement('div');
-        new QRCode(tempDiv, {text:aadhar, width:120, height:120});
+        let qr = new QRCode(tempDiv, {text:aadhar, width:120, height:120});
         setTimeout(()=>{
-            let qrImg = tempDiv.querySelector('img') || tempDiv.querySelector('canvas');
-            let qrBase64 = qrImg.src || qrImg.toDataURL("image/png");
-            resolve(qrBase64);
-        }, 100); // slight delay for QR code rendering
+            let qrImg = tempDiv.querySelector('img');
+            let qrCanvas = tempDiv.querySelector('canvas');
+
+            if(qrImg){
+                resolve(qrImg.src);
+            } else if(qrCanvas){
+                resolve(qrCanvas.toDataURL("image/png"));
+            } else {
+                resolve("");
+            }
+        }, 100);
     });
 }
 
-// Save Data in LocalStorage
+// Form Submission
 regForm.onsubmit = async e =>{
     e.preventDefault();
 
@@ -122,16 +129,26 @@ regForm.onsubmit = async e =>{
     let qrCode = await generateQR(aadharNum);
 
     let data={
-        fname:fname.value,lname:lname.value,mobile:mobile.value,
-        gender:gender.value,dob:dob.value,village:village.value,
-        country:country.value,state:state.value,district:district.value,
-        pin:pin.value,aadhar:aadharNum,photo:base64Photo,qr:qrCode
+        fname:fname.value,
+        lname:lname.value,
+        mobile:mobile.value,
+        gender:gender.value,
+        dob:dob.value,
+        village:village.value,
+        country:country.value,
+        state:state.value,
+        district:district.value,
+        pin:pin.value,
+        aadhar:aadharNum,
+        photo:base64Photo,
+        qr:qrCode
     };
 
     localStorage.setItem(mobile.value,JSON.stringify(data));
 
     alert("Registration Successful!");
-    location.href="search.html?mobile="+mobile.value; // open card page
+    // redirect to card display page
+    location.href="search.html?mobile="+mobile.value;
 }
 </script>
 </body>
