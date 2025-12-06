@@ -143,31 +143,34 @@ function verifyOTP(){
         return;
     }
 
-    // Prepare QR code text WITHOUT Base64 photo (to avoid QR error)
-    let qrText =
-`Aadhaar Number: ${foundUser.aadhar}
-Name: ${foundUser.fname} ${foundUser.lname}
-Gender: ${foundUser.gender}
-Mobile: ${foundUser.mobile}
-DOB: ${foundUser.dob}
+    // Prepare QR code text (line by line to avoid Chrome/QRCode.js errors)
+    let qrLines = [
+        `Aadhaar Number: ${foundUser.aadhar}`,
+        `Name: ${foundUser.fname} ${foundUser.lname}`,
+        `Gender: ${foundUser.gender}`,
+        `Mobile: ${foundUser.mobile}`,
+        `DOB: ${foundUser.dob}`,
+        ``,
+        `Address:`,
+        `Village: ${foundUser.village}`,
+        `District: ${foundUser.district}`,
+        `State: ${foundUser.state}`,
+        `Country: ${foundUser.country}`,
+        `PIN: ${foundUser.pin}`
+    ];
 
-Address:
-Village: ${foundUser.village}
-District: ${foundUser.district}
-State: ${foundUser.state}
-Country: ${foundUser.country}
-PIN: ${foundUser.pin}
-`;
+    let qrText = qrLines.join("\n");
 
     // Clear previous QR
     document.getElementById("qrcode").innerHTML = "";
 
-    // Generate QR code
+    // Generate QR code safely
     try{
         new QRCode(document.getElementById("qrcode"), {
             text: qrText,
-            width: 180,
-            height: 180
+            width: 250,
+            height: 250,
+            correctLevel: QRCode.CorrectLevel.H
         });
     } catch(err){
         console.error("QR code generation error:", err);
