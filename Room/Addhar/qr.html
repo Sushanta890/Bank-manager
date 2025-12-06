@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Aadhaar QR Code</title>
+
+<style>
+body{font-family:Arial;background:#eef3ff;padding:20px;}
+#box{width:380px;margin:auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 0 10px #bbb;}
+input{width:100%;padding:8px;margin-top:5px;margin-bottom:10px;border-radius:5px;border:1px solid #aaa;}
+button{padding:10px;width:100%;border:none;background:#0b63d1;color:#fff;font-size:16px;border-radius:5px;cursor:pointer;}
+#qrcode img{margin:auto;display:block;margin-top:20px;}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<h2 align="center">Aadhaar QR Code Download</h2>
+
+<div id="box">
+
+<input type="text" id="aadhar" placeholder="Enter Aadhaar Number">
+
+<button onclick="generateOTP()">Generate OTP</button>
+
+<input type="text" id="otpInput" placeholder="Enter OTP">
+
+<button onclick="verifyOTP()">Verify OTP</button>
+
+<div id="qrArea" style="display:none;">
+  <h3 align="center">Your Aadhaar QR Code</h3>
+  <div id="qrcode"></div>
+  <button onclick="downloadQR()">Download QR Code</button>
+</div>
+
+</div>
+
+<script>
+let otpGenerated = "";
+let userData = null;   // IMPORTANT FIX
+
+// Load data from previous page
+window.onload = function(){
+    let mobile = new URLSearchParams(location.search).get("mobile");
+
+    if(mobile){
+        let stored = localStorage.getItem(mobile);
+        if(stored){
+            userData = JSON.parse(stored);
+
+            // Auto-fill Aadhaar number
+            aadhar.value = userData.aadhar;
+        }
+    }
+}
+
+// Generate OTP
+function generateOTP(){
+    otpGenerated = Math.floor(1000 + Math.random()*9000).toString();
+    alert("Your OTP: " + otpGenerated);
+}
+
+// Verify OTP
+function verifyOTP(){
+
+    // Basic check
+    if(otpInput.value !== otpGenerated){
+        alert("Incorrect OTP!");
+        return;
+    }
+
+    // Check if userData exists
+    if(!userData){
+        alert("User data not found! Aadhaar details missing.");
+        return;
+    }
+
+    // Show QR section
+    qrArea.style.display = "block";
+    document.getElementById("qrcode").innerHTML = "";
+
+    // Generate QR code with user details
+    new QRCode(document.getElementById("qrcode"), {
+        text: `Aadhaar: ${userData.aadhar}
+Name: ${userData.fname} ${userData.lname}
+Mobile: ${userData.mobile}
+DOB: ${userData.dob}`,
+        width: 180,
+        height: 180
+    });
+
+    alert("OTP Verified! QR generated.");
+}
+
+// Download QR
+function downloadQR(){
+    let img = document.querySelector("#qrcode img");
+    let link = document.createElement("a");
+    link.href = img.src;
+    link.download = "Aadhaar_QR.png";
+    link.click();
+}
+</script>
+
+</body>
+</html>
