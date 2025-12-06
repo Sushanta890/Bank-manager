@@ -1,147 +1,158 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aadhaar QR & OTP Generator</title>
+<title>Aadhaar Card</title>
+
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #eef3ff;
-    padding: 20px;
+body{
+    font-family: Arial;
+    background:#e9f0ff;
+    text-align:center;
+    padding:20px;
 }
-.box {
-    width: 380px;
-    margin: auto;
-    padding: 20px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 0 10px #aaa;
+
+input{
+    padding:10px;
+    width:220px;
+    margin:5px;
+    border-radius:5px;
+    border:1px solid #aaa;
 }
-h2 {
-    text-align: center;
-    color: #333;
+button{
+    padding:10px 20px;
+    background:#0b63d1;
+    color:#fff;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    margin-top:5px;
 }
-input, button {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
+
+.card{
+    width:500px;
+    margin:30px auto;
+    background:#fff;
+    border-radius:14px;
+    border:1px solid #ccc;
+    overflow:hidden;
+    box-shadow:0 0 10px rgba(0,0,0,0.2);
 }
-button {
-    background-color: #0066cc;
-    color: white;
-    cursor: pointer;
-    border: none;
+
+.card-header{
+    padding:10px;
+    border-bottom:1px solid #e5e5e5;
 }
-button:hover {
-    background-color: #004999;
+.flag{font-weight:bold;font-size:16px;}
+.flag span:nth-child(1){color:#ff9933;}
+.flag span:nth-child(2){color:#138808;}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    padding:15px;
 }
-#qrcode {
-    display: block;
-    margin: 20px auto;
+.photo{
+    width:120px;height:140px;
+    border:1px solid #aaa;
+    background:#ccd6ff;
+    object-fit:cover;
 }
-#otpDisplay {
-    text-align: center;
-    font-weight: bold;
-    color: green;
-    margin-top: 10px;
-}
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 10px;
-}
-.action-buttons button {
-    width: auto;
-    padding: 8px 15px;
+.details{text-align:left;font-size:14px;line-height:22px;}
+.aadhar-num{font-size:22px;text-align:center;letter-spacing:3px;font-weight:bold;margin-top:5px;}
+.qr{width:120px;height:120px;margin-top:10px;}
+.footer{padding:10px;font-size:16px;}
+.footer span{color:red;font-weight:bold;}
+
+.action-btns{
+    margin-top:10px;
 }
 </style>
 </head>
 <body>
-<div class="box">
-    <h2>Aadhaar QR & OTP Generator</h2>
-    <input type="text" id="aadhaar" placeholder="Enter Aadhaar Number (12 digits)" maxlength="12">
-    <button onclick="generateQR()">Generate QR & OTP</button>
-    <canvas id="qrcode"></canvas>
-    <div id="otpDisplay"></div>
-    <div class="action-buttons">
-        <button onclick="downloadQR()">Download QR</button>
-        <button onclick="printQR()">Print QR</button>
-    </div>
-</div>
 
-<!-- QRCode.js library -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<h2>Aadhaar Card Viewer</h2>
+
+<input type="tel" id="searchMob" placeholder="Enter Mobile Number">
+<input type="password" id="verPin" placeholder="Enter 4 Digit PIN"><br>
+<button onclick="showCard()">Show Aadhaar</button>
+
+<div id="result"></div>
+
+<!-- Include html2canvas library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <script>
-let currentQRData = '';
+function showCard(){
+    let searchMob = document.getElementById('searchMob');
+    let verPin = document.getElementById('verPin');
+    let result = document.getElementById('result');
 
-function generateQR() {
-    const aadhaarInput = document.getElementById('aadhaar').value.trim();
-    const otpDisplay = document.getElementById('otpDisplay');
-    const canvas = document.getElementById('qrcode');
+    let data = JSON.parse(localStorage.getItem(searchMob.value));
 
-    // Clear previous QR and OTP
-    QRCode.toCanvas(canvas, '', function() {});
-    otpDisplay.textContent = '';
-    currentQRData = '';
-
-    // Validate Aadhaar number
-    if (!aadhaarInput) {
-        alert("Please enter Aadhaar number");
-        return;
+    if(!data){ 
+        result.innerHTML="<h3>No Record Found</h3>"; 
+        return; 
     }
-    if (!/^\d{12}$/.test(aadhaarInput)) {
-        alert("Aadhaar number must be 12 digits");
-        return;
+    if(data.pin != verPin.value){ 
+        result.innerHTML="<h3>Incorrect PIN</h3>"; 
+        return; 
     }
 
-    // Generate OTP (6 digits)
-    const otp = Math.floor(100000 + Math.random() * 900000);
+    result.innerHTML = `
+    <div id="cardArea" class="card">
+        <div class="card-header">
+            <div class="flag">
+                <span>भारत सरकार</span> | <span>GOVERNMENT OF INDIA</span>
+            </div>
+        </div>
 
-    // Combine Aadhaar and OTP for QR data
-    const qrData = `Aadhaar: ${aadhaarInput}\nOTP: ${otp}`;
-    currentQRData = qrData;
+        <div class="row">
+            <img class="photo" src="${data.photo || 'https://via.placeholder.com/120x140'}">
+            <div class="details">
+                <b>Name:</b> ${data.fname} ${data.lname}<br>
+                <b>DOB:</b> ${data.dob}<br>
+                <b>Gender:</b> ${data.gender}<br><br>
+                <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${data.aadhar}">
+            </div>
+        </div>
 
-    // Generate QR code
-    QRCode.toCanvas(canvas, qrData, { width: 200 }, function(error) {
-        if (error) {
-            console.error("QR generation failed:", error);
-            alert("Failed to generate QR code. See console for details.");
-        } else {
-            otpDisplay.textContent = `Generated OTP: ${otp}`;
-            console.log("QR code generated successfully");
-        }
+        <div class="aadhar-num">${data.aadhar.toString().replace(/(.{4})/g,'$1 ')}</div>
+
+        <div class="footer">
+            <span>आधार</span> - भारतीय विशिष्ट पहचान प्राधिकरण
+        </div>
+    </div>
+
+    <div class="action-btns">
+        <button onclick="downloadCard()">Download PNG</button>
+        <button onclick="printCard()">Print</button>
+    </div>
+    `;
+}
+
+// Download Aadhaar card as image
+function downloadCard(){
+    const card = document.getElementById('cardArea');
+    html2canvas(card).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'aadhaar_card.png';
+        link.href = canvas.toDataURL();
+        link.click();
     });
 }
 
-// Download QR code as PNG
-function downloadQR() {
-    if (!currentQRData) {
-        alert("Generate QR first!");
-        return;
-    }
-    const canvas = document.getElementById('qrcode');
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL("image/png");
-    link.download = 'aadhaar_qr.png';
-    link.click();
-}
-
-// Print QR code
-function printQR() {
-    if (!currentQRData) {
-        alert("Generate QR first!");
-        return;
-    }
-    const canvas = document.getElementById('qrcode');
-    const dataUrl = canvas.toDataURL("image/png");
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`<img src="${dataUrl}" onload="window.print();window.close()" />`);
+// Print Aadhaar card
+function printCard(){
+    const card = document.getElementById('cardArea');
+    const newWin = window.open('', '_blank');
+    newWin.document.write('<html><head><title>Aadhaar Card</title></head><body>');
+    newWin.document.write(card.outerHTML);
+    newWin.document.write('</body></html>');
+    newWin.document.close();
+    newWin.print();
 }
 </script>
+
 </body>
 </html>
