@@ -49,6 +49,16 @@ button:hover {
     color: green;
     margin-top: 10px;
 }
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+}
+.action-buttons button {
+    width: auto;
+    padding: 8px 15px;
+}
 </style>
 </head>
 <body>
@@ -58,11 +68,17 @@ button:hover {
     <button onclick="generateQR()">Generate QR & OTP</button>
     <canvas id="qrcode"></canvas>
     <div id="otpDisplay"></div>
+    <div class="action-buttons">
+        <button onclick="downloadQR()">Download QR</button>
+        <button onclick="printQR()">Print QR</button>
+    </div>
 </div>
 
 <!-- QRCode.js library -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
+let currentQRData = '';
+
 function generateQR() {
     const aadhaarInput = document.getElementById('aadhaar').value.trim();
     const otpDisplay = document.getElementById('otpDisplay');
@@ -71,6 +87,7 @@ function generateQR() {
     // Clear previous QR and OTP
     QRCode.toCanvas(canvas, '', function() {});
     otpDisplay.textContent = '';
+    currentQRData = '';
 
     // Validate Aadhaar number
     if (!aadhaarInput) {
@@ -87,6 +104,7 @@ function generateQR() {
 
     // Combine Aadhaar and OTP for QR data
     const qrData = `Aadhaar: ${aadhaarInput}\nOTP: ${otp}`;
+    currentQRData = qrData;
 
     // Generate QR code
     QRCode.toCanvas(canvas, qrData, { width: 200 }, function(error) {
@@ -98,6 +116,31 @@ function generateQR() {
             console.log("QR code generated successfully");
         }
     });
+}
+
+// Download QR code as PNG
+function downloadQR() {
+    if (!currentQRData) {
+        alert("Generate QR first!");
+        return;
+    }
+    const canvas = document.getElementById('qrcode');
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL("image/png");
+    link.download = 'aadhaar_qr.png';
+    link.click();
+}
+
+// Print QR code
+function printQR() {
+    if (!currentQRData) {
+        alert("Generate QR first!");
+        return;
+    }
+    const canvas = document.getElementById('qrcode');
+    const dataUrl = canvas.toDataURL("image/png");
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`<img src="${dataUrl}" onload="window.print();window.close()" />`);
 }
 </script>
 </body>
