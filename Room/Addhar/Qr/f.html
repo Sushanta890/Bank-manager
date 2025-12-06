@@ -2,63 +2,70 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Aadhaar QR Upload & Decode</title>
+<title>Aadhaar QR Scanner & Viewer</title>
 <style>
-body{
+body {
     font-family: Arial;
-    background:#eef3ff;
-    padding:20px;
+    background: #eef3ff;
+    padding: 20px;
 }
-.box{
-    width:400px;
-    margin:auto;
-    padding:20px;
-    background:white;
-    border-radius:10px;
-    box-shadow:0 0 10px #aaa;
+.box {
+    width: 420px;
+    margin: auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #aaa;
 }
-input[type=file]{
-    width:100%;
-    padding:10px;
-    margin-top:10px;
+input, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #888;
+    font-size: 16px;
 }
-#userDetails{
-    display:none;
-    margin-top:20px;
+button {
+    background: #0b63d1;
+    color: white;
+    border: none;
+    cursor: pointer;
 }
-#userPhoto{
-    display:block;
-    width:100px;
-    height:100px;
-    margin:auto;
-    border-radius:50%;
-    margin-bottom:10px;
+#userPhoto {
+    display: block;
+    width: 100px;
+    height: 100px;
+    margin: auto;
+    border-radius: 50%;
+    margin-bottom: 10px;
 }
-pre{
-    background:#f3f3f3;
-    padding:10px;
-    border-radius:5px;
-    overflow-x:auto;
+#details {
+    display: none;
+    margin-top: 15px;
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+
+<!-- html5-qrcode library -->
+<script src="https://unpkg.com/html5-qrcode@2.3.9/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
 
-<h2 align="center">Upload Aadhaar QR Code</h2>
-<div class="box">
-    <input type="file" id="qrUpload" accept="image/*">
-    <button onclick="decodeQR()">Decode QR & Fetch Data</button>
+<h2 align="center">Aadhaar QR Scanner & Viewer</h2>
 
-    <div id="userDetails">
+<div class="box">
+    <h3>Step 1: Upload QR Code Image</h3>
+    <input type="file" id="qrUpload" accept="image/*">
+    <button onclick="scanQRImage()">Scan QR Code</button>
+
+    <div id="details">
+        <h3>User Details</h3>
         <img id="userPhoto" src="" alt="User Photo">
-        <h3 align="center">Aadhaar Details</h3>
-        <pre id="detailsText"></pre>
+        <div id="userData"></div>
     </div>
 </div>
 
 <script>
-function decodeQR(){
+function scanQRImage() {
     const fileInput = document.getElementById('qrUpload');
     if(fileInput.files.length === 0){
         alert("Please select a QR code image!");
@@ -67,43 +74,52 @@ function decodeQR(){
 
     const file = fileInput.files[0];
     const reader = new FileReader();
-
-    reader.onload = function(){
+    reader.onload = function() {
         const img = new Image();
-        img.onload = function(){
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, img.width, img.height);
-            const imageData = ctx.getImageData(0, 0, img.width, img.height);
-
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
-            if(code){
-                const qrContent = code.data;
-                // Extract Aadhaar number from QR text
-                const match = qrContent.match(/Aadhaar Number:\s*(\d{12})/);
-                if(match){
-                    const aadhar = match[1];
-                    const storedData = localStorage.getItem(aadhar);
-                    if(storedData){
-                        const user = JSON.parse(storedData);
-                        document.getElementById('userPhoto').src = user.photo || "";
-                        document.getElementById('detailsText').textContent = qrContent;
-                        document.getElementById('userDetails').style.display = 'block';
-                        console.log("Aadhaar data loaded for:", aadhar);
-                    } else {
-                        alert("Aadhaar data not found in localStorage!");
-                    }
-                } else {
-                    alert("Invalid QR code!");
-                }
-            } else {
-                alert("Could not detect QR code in the image!");
-            }
-        }
         img.src = reader.result;
-    }
+        img.onload = function() {
+            const html5QrCode = new Html5Qrcode("reader-placeholder");
+            html5QrCode.scanFile(file, true)
+            .then(decodedText => {
+                console.log("Decoded QR text:", decodedText);
+                try {
+                    // Try to parse text as JSON
+                    const lines = decodedText.split("\n");
+                    let data = {};
+                    lines.forEach(line => {
+                        const parts = line.split(":");
+                        if(parts.length >= 2){
+                            const key = parts[0].trim();
+                            const value = parts.slice(1).join(":").trim();
+                            data[key] = value;
+                        }
+                    });
+
+                    // Save to localStorage
+                    if(data["Aadhaar Number"]){
+                        localStorage.setItem(data["Aadhaar Number"], JSON.stringify(data));
+                    }
+
+                    // Display data
+                    let html = "";
+                    for(let key in data){
+                        html += `<b>${key}:</b> ${data[key]}<br>`;
+                    }
+                    document.getElementById("userData").innerHTML = html;
+                    document.getElementById("userPhoto").src = data["Photo(Base64)"] || "";
+                    document.getElementById("details").style.display = "block";
+
+                } catch(e) {
+                    alert("Failed to parse QR data: " + e);
+                    console.error(e);
+                }
+            })
+            .catch(err => {
+                console.error("QR scan failed:", err);
+                alert("Failed to read QR code. Make sure image is clear.");
+            });
+        }
+    };
     reader.readAsDataURL(file);
 }
 </script>
