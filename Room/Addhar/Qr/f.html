@@ -1,125 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Aadhaar QR Scanner & Viewer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload QR & Show Aadhaar Info</title>
 <style>
-body {
-    font-family: Arial;
-    background: #eef3ff;
-    padding: 20px;
-}
-.box {
-    width: 420px;
-    margin: auto;
-    padding: 20px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 0 10px #aaa;
-}
-input, button {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 5px;
-    border: 1px solid #888;
-    font-size: 16px;
-}
-button {
-    background: #0b63d1;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-#userPhoto {
-    display: block;
-    width: 100px;
-    height: 100px;
-    margin: auto;
-    border-radius: 50%;
-    margin-bottom: 10px;
-}
-#details {
-    display: none;
-    margin-top: 15px;
-}
+body { font-family: Arial; background: #eef3ff; padding: 20px; }
+.box { width: 400px; margin: auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px #aaa; }
+h2 { text-align: center; color: #333; }
+input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+button { background-color: #0066cc; color: white; cursor: pointer; border: none; }
+button:hover { background-color: #004999; }
+#preview { text-align: center; margin-top: 20px; }
+#preview img { max-width: 150px; margin-bottom: 10px; border: 1px solid #aaa; border-radius: 5px; }
+.info { margin: 5px 0; font-weight: bold; }
+canvas { display: none; }
 </style>
-
-<!-- html5-qrcode library -->
-<script src="https://unpkg.com/html5-qrcode@2.3.9/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
 
-<h2 align="center">Aadhaar QR Scanner & Viewer</h2>
-
 <div class="box">
-    <h3>Step 1: Upload QR Code Image</h3>
-    <input type="file" id="qrUpload" accept="image/*">
-    <button onclick="scanQRImage()">Scan QR Code</button>
+    <h2>Upload QR & Show Info</h2>
+    <input type="file" id="qrFile" accept="image/*">
+    <button onclick="readQR()">Read QR & Show Info</button>
 
-    <div id="details">
-        <h3>User Details</h3>
-        <img id="userPhoto" src="" alt="User Photo">
-        <div id="userData"></div>
+    <div id="preview">
+        <img id="photo" src="" alt="User Photo">
+        <div class="info" id="nameDisplay"></div>
+        <div class="info" id="aadhaarDisplay"></div>
+        <div class="info" id="dobDisplay"></div>
+        <div class="info" id="genderDisplay"></div>
     </div>
+    <canvas id="qrCanvas"></canvas>
 </div>
 
+<!-- jsQR library -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
 <script>
-function scanQRImage() {
-    const fileInput = document.getElementById('qrUpload');
-    if(fileInput.files.length === 0){
+function readQR() {
+    const fileInput = document.getElementById('qrFile');
+    const file = fileInput.files[0];
+    if(!file) {
         alert("Please select a QR code image!");
         return;
     }
 
-    const file = fileInput.files[0];
     const reader = new FileReader();
-    reader.onload = function() {
+    reader.onload = function(e) {
         const img = new Image();
-        img.src = reader.result;
         img.onload = function() {
-            const html5QrCode = new Html5Qrcode("reader-placeholder");
-            html5QrCode.scanFile(file, true)
-            .then(decodedText => {
-                console.log("Decoded QR text:", decodedText);
+            const canvas = document.getElementById('qrCanvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+            if(code) {
+                // Assume QR stores JSON: { "photo": "url", "name": "", "aadhaar": "", "dob": "", "gender": "" }
                 try {
-                    // Try to parse text as JSON
-                    const lines = decodedText.split("\n");
-                    let data = {};
-                    lines.forEach(line => {
-                        const parts = line.split(":");
-                        if(parts.length >= 2){
-                            const key = parts[0].trim();
-                            const value = parts.slice(1).join(":").trim();
-                            data[key] = value;
-                        }
-                    });
-
-                    // Save to localStorage
-                    if(data["Aadhaar Number"]){
-                        localStorage.setItem(data["Aadhaar Number"], JSON.stringify(data));
-                    }
-
-                    // Display data
-                    let html = "";
-                    for(let key in data){
-                        html += `<b>${key}:</b> ${data[key]}<br>`;
-                    }
-                    document.getElementById("userData").innerHTML = html;
-                    document.getElementById("userPhoto").src = data["Photo(Base64)"] || "";
-                    document.getElementById("details").style.display = "block";
-
-                } catch(e) {
-                    alert("Failed to parse QR data: " + e);
-                    console.error(e);
+                    const data = JSON.parse(code.data);
+                    document.getElementById('photo').src = data.photo || '';
+                    document.getElementById('nameDisplay').textContent = `Name: ${data.name || ''}`;
+                    document.getElementById('aadhaarDisplay').textContent = `Aadhaar: ${data.aadhaar || ''}`;
+                    document.getElementById('dobDisplay').textContent = `DOB: ${data.dob || ''}`;
+                    document.getElementById('genderDisplay').textContent = `Gender: ${data.gender || ''}`;
+                } catch(err) {
+                    alert("QR code data format is invalid. Must be JSON with photo, name, aadhaar, dob, gender.");
+                    console.error(err);
                 }
-            })
-            .catch(err => {
-                console.error("QR scan failed:", err);
-                alert("Failed to read QR code. Make sure image is clear.");
-            });
+            } else {
+                alert("Failed to read QR code. Make sure the image is clear.");
+            }
         }
-    };
+        img.src = e.target.result;
+    }
     reader.readAsDataURL(file);
 }
 </script>
