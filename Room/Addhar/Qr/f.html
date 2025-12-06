@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Aadhaar QR Upload & Decode</title>
+<style>
+body{
+    font-family: Arial;
+    background:#eef3ff;
+    padding:20px;
+}
+.box{
+    width:400px;
+    margin:auto;
+    padding:20px;
+    background:white;
+    border-radius:10px;
+    box-shadow:0 0 10px #aaa;
+}
+input[type=file]{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+}
+#userDetails{
+    display:none;
+    margin-top:20px;
+}
+#userPhoto{
+    display:block;
+    width:100px;
+    height:100px;
+    margin:auto;
+    border-radius:50%;
+    margin-bottom:10px;
+}
+pre{
+    background:#f3f3f3;
+    padding:10px;
+    border-radius:5px;
+    overflow-x:auto;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+</head>
+<body>
+
+<h2 align="center">Upload Aadhaar QR Code</h2>
+<div class="box">
+    <input type="file" id="qrUpload" accept="image/*">
+    <button onclick="decodeQR()">Decode QR & Fetch Data</button>
+
+    <div id="userDetails">
+        <img id="userPhoto" src="" alt="User Photo">
+        <h3 align="center">Aadhaar Details</h3>
+        <pre id="detailsText"></pre>
+    </div>
+</div>
+
+<script>
+function decodeQR(){
+    const fileInput = document.getElementById('qrUpload');
+    if(fileInput.files.length === 0){
+        alert("Please select a QR code image!");
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(){
+        const img = new Image();
+        img.onload = function(){
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+            const imageData = ctx.getImageData(0, 0, img.width, img.height);
+
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            if(code){
+                const qrContent = code.data;
+                // Extract Aadhaar number from QR text
+                const match = qrContent.match(/Aadhaar Number:\s*(\d{12})/);
+                if(match){
+                    const aadhar = match[1];
+                    const storedData = localStorage.getItem(aadhar);
+                    if(storedData){
+                        const user = JSON.parse(storedData);
+                        document.getElementById('userPhoto').src = user.photo || "";
+                        document.getElementById('detailsText').textContent = qrContent;
+                        document.getElementById('userDetails').style.display = 'block';
+                        console.log("Aadhaar data loaded for:", aadhar);
+                    } else {
+                        alert("Aadhaar data not found in localStorage!");
+                    }
+                } else {
+                    alert("Invalid QR code!");
+                }
+            } else {
+                alert("Could not detect QR code in the image!");
+            }
+        }
+        img.src = reader.result;
+    }
+    reader.readAsDataURL(file);
+}
+</script>
+
+</body>
+</html>
