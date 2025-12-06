@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Delete Aadhaar</title>
+<style>
+body{
+    font-family:Arial;
+    background:#eef3ff;
+    padding:20px;
+}
+.box{
+    width:380px;
+    margin:auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px #bbb;
+}
+input{
+    width:100%;
+    padding:8px;
+    margin-top:5px;
+    margin-bottom:10px;
+    border-radius:5px;
+    border:1px solid #aaa;
+}
+button{
+    padding:10px;
+    width:100%;
+    border:none;
+    background:#d11a1a;
+    color:#fff;
+    font-size:16px;
+    border-radius:5px;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h2 align="center">Delete Aadhaar Record</h2>
+
+<div class="box">
+    <input type="number" id="delAadhar" placeholder="Enter Aadhaar Number to Delete">
+    <button onclick="deleteAadhar()">Delete Aadhaar</button>
+</div>
+
+<script>
+function deleteAadhar() {
+    let aadhaar = delAadhar.value.trim();
+
+    if (aadhaar === "") {
+        alert("Please enter Aadhaar number!");
+        return;
+    }
+
+    let deleted = false;
+
+    // Loop through localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+        let key = localStorage.key(i);
+        let data = JSON.parse(localStorage.getItem(key));
+
+        if (data && data.aadhar == aadhaar) {
+            localStorage.removeItem(key);
+            deleted = true;
+            break;
+        }
+    }
+
+    if (deleted)
+        alert("Aadhaar Deleted Successfully!");
+    else
+        alert("Aadhaar Not Found!");
+}
+</script>
+
+</body>
+</html>
