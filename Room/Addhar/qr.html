@@ -1,204 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aadhaar QR & OTP Generator</title>
 <style>
-body{
-    font-family: Arial;
-    background:#eef3ff;
-    padding:20px;
+body {
+    font-family: Arial, sans-serif;
+    background: #eef3ff;
+    padding: 20px;
 }
-.box{
-    width:380px;
-    margin:auto;
-    padding:20px;
-    background:white;
-    border-radius:10px;
-    box-shadow:0 0 10px #aaa;
+.box {
+    width: 380px;
+    margin: auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #aaa;
 }
-input{
-    width:100%;
-    padding:10px;
-    margin-top:10px;
-    border-radius:5px;
-    border:1px solid #888;
+h2 {
+    text-align: center;
+    color: #333;
 }
-button{
-    width:100%;
-    padding:10px;
-    margin-top:10px;
-    background:#0b63d1;
-    border:none;
-    color:white;
-    font-size:16px;
-    border-radius:5px;
-    cursor:pointer;
+input, button {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
 }
-#details, #qrSection{
-    display:none;
-    margin-top:15px;
+button {
+    background-color: #0066cc;
+    color: white;
+    cursor: pointer;
+    border: none;
 }
-#qrcode{
-    text-align:center;
-    margin-top:10px;
+button:hover {
+    background-color: #004999;
 }
-#qrcode img{
-    display:block;
-    margin:auto;
+#qrcode {
+    display: block;
+    margin: 20px auto;
 }
-#userPhoto{
-    display:block;
-    width:100px;
-    height:100px;
-    margin:auto;
-    border-radius:50%;
-    margin-bottom:10px;
+#otpDisplay {
+    text-align: center;
+    font-weight: bold;
+    color: green;
+    margin-top: 10px;
 }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-
-<h2 align="center">Aadhaar OTP & QR Code Generator</h2>
-
 <div class="box">
-
-    <h3>Step 1: Enter Aadhaar Number</h3>
-    <input id="aadharInput" placeholder="Enter Aadhaar Number" maxlength="12">
-
-    <button onclick="findUser()">Find Aadhaar Data</button>
-
-    <div id="details">
-        <h3>Step 2: OTP Verification</h3>
-        <p><b>OTP Sent:</b> <span id="otpShow"></span></p>
-        <input id="otpInput" placeholder="Enter OTP">
-        <button onclick="verifyOTP()">Verify OTP</button>
-    </div>
-
-    <div id="qrSection">
-        <h3 align="center">Your Aadhaar QR Code</h3>
-        <img id="userPhoto" src="" alt="User Photo">
-        <div id="qrcode"></div>
-        <button onclick="downloadQR()">Download QR Code</button>
-        <button onclick="window.print()">Print</button>
-    </div>
-
+    <h2>Aadhaar QR & OTP Generator</h2>
+    <input type="text" id="aadhaar" placeholder="Enter Aadhaar Number (12 digits)" maxlength="12">
+    <button onclick="generateQR()">Generate QR & OTP</button>
+    <canvas id="qrcode"></canvas>
+    <div id="otpDisplay"></div>
 </div>
 
+<!-- QRCode.js library -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
-let foundUser = null;
-let generatedOTP = null;
+function generateQR() {
+    const aadhaarInput = document.getElementById('aadhaar').value.trim();
+    const otpDisplay = document.getElementById('otpDisplay');
+    const canvas = document.getElementById('qrcode');
 
-// Step 1 – Find User by Aadhaar Number
-function findUser(){
-    let aadhar = document.getElementById("aadharInput").value.trim();
+    // Clear previous QR and OTP
+    QRCode.toCanvas(canvas, '', function() {});
+    otpDisplay.textContent = '';
 
-    if(aadhar.length !== 12 || isNaN(aadhar)){
-        alert("Enter valid 12 digit Aadhaar number");
+    // Validate Aadhaar number
+    if (!aadhaarInput) {
+        alert("Please enter Aadhaar number");
+        return;
+    }
+    if (!/^\d{12}$/.test(aadhaarInput)) {
+        alert("Aadhaar number must be 12 digits");
         return;
     }
 
-    foundUser = null;
+    // Generate OTP (6 digits)
+    const otp = Math.floor(100000 + Math.random() * 900000);
 
-    // Search all localStorage keys
-    for(let i=0; i<localStorage.length; i++){
-        let key = localStorage.key(i);
-        try{
-            let data = JSON.parse(localStorage.getItem(key));
-            if(data && data.aadhar === aadhar){
-                foundUser = data;
-                break;
-            }
-        } catch(e){
-            continue;
+    // Combine Aadhaar and OTP for QR data
+    const qrData = `Aadhaar: ${aadhaarInput}\nOTP: ${otp}`;
+
+    // Generate QR code
+    QRCode.toCanvas(canvas, qrData, { width: 200 }, function(error) {
+        if (error) {
+            console.error("QR generation failed:", error);
+            alert("Failed to generate QR code. See console for details.");
+        } else {
+            otpDisplay.textContent = `Generated OTP: ${otp}`;
+            console.log("QR code generated successfully");
         }
-    }
-
-    if(!foundUser){
-        alert("Aadhaar not found in localStorage!");
-        return;
-    }
-
-    // Show user photo if available
-    document.getElementById("userPhoto").src = foundUser.photo || "";
-
-    // Generate OTP
-    generatedOTP = Math.floor(100000 + Math.random()*900000);
-    document.getElementById("otpShow").innerText = generatedOTP;
-
-    document.getElementById("details").style.display = "block";
-}
-
-// Step 2 – Verify OTP and Generate QR Code
-function verifyOTP(){
-    let otpInputVal = document.getElementById("otpInput").value.trim();
-    if(otpInputVal != generatedOTP){
-        alert("Incorrect OTP!");
-        return;
-    }
-
-    if(!foundUser){
-        alert("User data missing!");
-        return;
-    }
-
-    // Prepare QR code text (line by line to avoid Chrome/QRCode.js errors)
-    let qrLines = [
-        `Aadhaar Number: ${foundUser.aadhar}`,
-        `Name: ${foundUser.fname} ${foundUser.lname}`,
-        `Gender: ${foundUser.gender}`,
-        `Mobile: ${foundUser.mobile}`,
-        `DOB: ${foundUser.dob}`,
-        ``,
-        `Address:`,
-        `Village: ${foundUser.village}`,
-        `District: ${foundUser.district}`,
-        `State: ${foundUser.state}`,
-        `Country: ${foundUser.country}`,
-        `PIN: ${foundUser.pin}`
-    ];
-
-    let qrText = qrLines.join("\n");
-
-    // Clear previous QR
-    document.getElementById("qrcode").innerHTML = "";
-
-    // Generate QR code safely
-    try{
-        new QRCode(document.getElementById("qrcode"), {
-            text: qrText,
-            width: 250,
-            height: 250,
-            correctLevel: QRCode.CorrectLevel.H
-        });
-    } catch(err){
-        console.error("QR code generation error:", err);
-        alert("Failed to generate QR code. See console for details.");
-        return;
-    }
-
-    // Show QR section
-    document.getElementById("qrSection").style.display = "block";
-
-    // Save QR text to localStorage
-    localStorage.setItem(foundUser.aadhar + "_qr", qrText);
-    console.log("QR data saved to localStorage for Aadhaar:", foundUser.aadhar);
-}
-
-// Download QR Code
-function downloadQR(){
-    let img = document.querySelector("#qrcode img");
-    if(!img){ 
-        alert("Generate QR Code first!"); 
-        return; 
-    }
-    let link = document.createElement("a");
-    link.href = img.src;
-    link.download = "Aadhaar_QR.png";
-    link.click();
+    });
 }
 </script>
-
 </body>
 </html>
