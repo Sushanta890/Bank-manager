@@ -252,30 +252,86 @@ function loadTables(){
     document.getElementById("currentBalance").innerText = totalCredit - totalDebit;
 }
 
-function downloadHistory(){
+function downloadHistory() {
     let f = document.getElementById("fromDate").value;
     let t = document.getElementById("toDate").value;
 
-    if(!f || !t){
+    if (!f || !t) {
         alert("Select both dates!");
         return;
     }
 
-    let text = "SK BANK - Transaction History\n";
-    text += "From: "+f+"  To: "+t+"\n\n";
+    let text = "";
+    text += "==============================\n";
+    text += "       SK BANK REPORT\n";
+    text += "==============================\n\n";
+
+    text += "Date Range: " + f + " to " + t + "\n";
+    text += "Generated On: " + new Date().toLocaleString() + "\n\n";
+
+    text += "----------------------------------\n";
+    text += "     ✔ APPROVED DEPOSITS\n";
+    text += "----------------------------------\n";
+
+    let found = false;
 
     bankUser.history.forEach(tn => {
         let d = tn.datetime.split(" ")[0];
 
-        if(d >= f && d <= t){
-            text += `${tn.type} | ₹${tn.amount} | ${tn.datetime}\n`;
+        if (tn.type === "Deposit Approved" && d >= f && d <= t) {
+            text += `Name: ${tn.depositor}\n`;
+            text += `Amount: ₹${tn.amount}\n`;
+            text += `Date & Time: ${tn.datetime}\n`;
+            text += "----------------------------------\n";
+            found = true;
         }
     });
 
-    let file = new Blob([text], {type:'text/plain'});
+    if (!found) text += "No deposit records found.\n";
+
+    text += "\n----------------------------------\n";
+    text += "     📌 PURCHASES & BILLS\n";
+    text += "----------------------------------\n";
+
+    let found2 = false;
+
+    bankUser.history.forEach(tn => {
+        let d = tn.datetime.split(" ")[0];
+
+        if (tn.type !== "Deposit Approved" && d >= f && d <= t) {
+            text += `Type: ${tn.type}\n`;
+            text += `Amount: ₹${tn.amount}\n`;
+            text += `Date & Time: ${tn.datetime}\n`;
+            text += "----------------------------------\n";
+            found2 = true;
+        }
+    });
+
+    if (!found2) text += "No purchase/bill records found.\n";
+
+    text += "\n----------------------------------\n";
+    text += "     ⏳ PENDING DEPOSITS\n";
+    text += "----------------------------------\n";
+
+    if (bankUser.pending.length > 0) {
+        bankUser.pending.forEach(p => {
+            let d = p.datetime.split(" ")[0];
+            if (d >= f && d <= t) {
+                text += `Name: ${p.depositor}\n`;
+                text += `Amount: ₹${p.amount}\n`;
+                text += `Date & Time: ${p.datetime}\n`;
+                text += "----------------------------------\n";
+            }
+        });
+    } else {
+        text += "No pending deposits found.\n";
+    }
+
+    // DOWNLOAD FILE
+    let file = new Blob([text], { type: 'text/plain' });
     let a = document.createElement("a");
     a.href = URL.createObjectURL(file);
-    a.download = "SK_Transaction_History.txt";
+    a.download = "SK_FULL_TRANSACTION_HISTORY.txt";
     a.click();
 }
 
